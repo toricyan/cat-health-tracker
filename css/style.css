@@ -1,0 +1,1110 @@
+/* ========================================
+   🐱 にゃん健康手帳 - スタイルシート
+   ======================================== */
+
+:root {
+    /* カラーパレット - 温かみのある猫テーマ */
+    --primary: #E8927C;
+    --primary-light: #F5B8A9;
+    --primary-dark: #D4735D;
+    --secondary: #7CBAAB;
+    --secondary-light: #A8D5CA;
+    --accent: #F2C94C;
+    --accent-soft: #FFF3D4;
+    
+    /* 背景色 */
+    --bg-main: #FDF8F5;
+    --bg-card: #FFFFFF;
+    --bg-section: #FAF5F2;
+    
+    /* テキスト色 */
+    --text-primary: #4A3F3A;
+    --text-secondary: #8B7D75;
+    --text-light: #B8A99F;
+    
+    /* 状態色 */
+    --success: #6BBF8A;
+    --warning: #F2994A;
+    --danger: #EB5757;
+    --info: #56CCF2;
+    
+    /* シャドウ */
+    --shadow-sm: 0 2px 8px rgba(74, 63, 58, 0.08);
+    --shadow-md: 0 4px 16px rgba(74, 63, 58, 0.12);
+    --shadow-lg: 0 8px 32px rgba(74, 63, 58, 0.16);
+    
+    /* ボーダー半径 */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --radius-xl: 28px;
+    
+    /* トランジション */
+    --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: 'M PLUS Rounded 1c', 'Noto Sans JP', sans-serif;
+    background: var(--bg-main);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* ========================================
+   アプリコンテナ
+   ======================================== */
+.app-container {
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: var(--bg-main);
+    position: relative;
+}
+
+/* ========================================
+   ヘッダー
+   ======================================== */
+.app-header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    padding: 20px 16px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-md);
+}
+
+.header-content h1 {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 16px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.cat-selector {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.cat-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: var(--radius-xl);
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    backdrop-filter: blur(10px);
+}
+
+.cat-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.cat-btn.active {
+    background: white;
+    color: var(--primary);
+    border-color: white;
+    box-shadow: var(--shadow-md);
+}
+
+.cat-icon {
+    font-size: 1.3rem;
+}
+
+/* ========================================
+   タブナビゲーション
+   ======================================== */
+.tab-nav {
+    display: flex;
+    background: var(--bg-card);
+    padding: 8px;
+    gap: 4px;
+    position: sticky;
+    top: 108px;
+    z-index: 90;
+    box-shadow: var(--shadow-sm);
+}
+
+.tab-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 4px;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.tab-btn:hover {
+    background: var(--bg-section);
+}
+
+.tab-btn.active {
+    background: var(--primary-light);
+    color: var(--primary-dark);
+}
+
+.tab-icon {
+    font-size: 1.4rem;
+}
+
+.tab-label {
+    white-space: nowrap;
+}
+
+/* ========================================
+   メインコンテンツ
+   ======================================== */
+.main-content {
+    padding-bottom: 100px;
+}
+
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ========================================
+   フォーム共通
+   ======================================== */
+.record-form {
+    padding: 16px;
+}
+
+.form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.form-header h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.date-input,
+.time-input {
+    padding: 10px 14px;
+    border: 2px solid var(--primary-light);
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    font-family: inherit;
+    color: var(--text-primary);
+    background: var(--bg-card);
+    transition: var(--transition);
+}
+
+.date-input:focus,
+.time-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(232, 146, 124, 0.2);
+}
+
+/* フォームセクション */
+.form-section {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-sm);
+}
+
+.form-section h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--bg-section);
+}
+
+/* フォーム行 */
+.form-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.form-row:last-child {
+    margin-bottom: 0;
+}
+
+.form-row > label {
+    width: 80px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+/* 入力グループ */
+.input-group {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    gap: 8px;
+}
+
+.input-group input {
+    flex: 1;
+    padding: 12px 14px;
+    border: 2px solid var(--bg-section);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    font-family: inherit;
+    color: var(--text-primary);
+    background: var(--bg-section);
+    transition: var(--transition);
+    max-width: 120px;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: var(--bg-card);
+    box-shadow: 0 0 0 3px rgba(232, 146, 124, 0.15);
+}
+
+.input-group input::placeholder {
+    color: var(--text-light);
+}
+
+.unit {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    min-width: 30px;
+}
+
+/* ラジオボタングループ */
+.radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    flex: 1;
+}
+
+.radio-btn {
+    cursor: pointer;
+}
+
+.radio-btn input {
+    display: none;
+}
+
+.radio-btn span {
+    display: inline-block;
+    padding: 8px 14px;
+    background: var(--bg-section);
+    border: 2px solid transparent;
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: var(--transition);
+}
+
+.radio-btn:hover span {
+    background: var(--primary-light);
+    color: var(--primary-dark);
+}
+
+.radio-btn input:checked + span {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary-dark);
+}
+
+/* チェックボックスリスト */
+.medicine-checklist {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 10px 12px;
+    background: var(--bg-section);
+    border-radius: var(--radius-md);
+    transition: var(--transition);
+}
+
+.checkbox-item:hover {
+    background: var(--primary-light);
+}
+
+.checkbox-item input {
+    display: none;
+}
+
+.checkbox-custom {
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--text-light);
+    border-radius: 6px;
+    position: relative;
+    transition: var(--transition);
+    flex-shrink: 0;
+}
+
+.checkbox-custom::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    font-size: 14px;
+    color: white;
+    transition: var(--transition);
+}
+
+.checkbox-item input:checked + .checkbox-custom {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.checkbox-item input:checked + .checkbox-custom::after {
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.checkbox-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+/* テキストエリア */
+textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid var(--bg-section);
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    font-family: inherit;
+    color: var(--text-primary);
+    background: var(--bg-section);
+    resize: vertical;
+    transition: var(--transition);
+}
+
+textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: var(--bg-card);
+    box-shadow: 0 0 0 3px rgba(232, 146, 124, 0.15);
+}
+
+textarea::placeholder {
+    color: var(--text-light);
+}
+
+/* 送信ボタン */
+.submit-btn {
+    width: 100%;
+    padding: 16px 24px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    border: none;
+    border-radius: var(--radius-lg);
+    color: white;
+    font-size: 1.05rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--shadow-md);
+    margin-top: 8px;
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.submit-btn:active {
+    transform: translateY(0);
+}
+
+.submit-btn.secondary {
+    background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-light) 100%);
+}
+
+/* ========================================
+   クイック追加セクション（排泄）
+   ======================================== */
+.quick-add-section {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-sm);
+}
+
+.quick-add-section h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 14px;
+}
+
+.quick-btns {
+    display: flex;
+    gap: 12px;
+}
+
+.quick-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 12px;
+    background: var(--bg-section);
+    border: 3px solid transparent;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.quick-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.quick-btn:active {
+    transform: translateY(0);
+}
+
+.quick-btn.urine {
+    border-color: var(--info);
+}
+
+.quick-btn.urine:hover {
+    background: rgba(86, 204, 242, 0.15);
+}
+
+.quick-btn.feces {
+    border-color: var(--warning);
+}
+
+.quick-btn.feces:hover {
+    background: rgba(242, 153, 74, 0.15);
+}
+
+.quick-btn.both {
+    border-color: var(--secondary);
+}
+
+.quick-btn.both:hover {
+    background: rgba(124, 186, 171, 0.15);
+}
+
+.quick-icon {
+    font-size: 2rem;
+}
+
+.quick-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* 記録リスト */
+.record-list {
+    /* 高さ制限なし - 全て表示 */
+}
+
+.record-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    background: var(--bg-section);
+    border-radius: var(--radius-md);
+    margin-bottom: 8px;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.record-item:last-child {
+    margin-bottom: 0;
+}
+
+.record-time {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    min-width: 60px;
+}
+
+.record-type {
+    font-size: 1.2rem;
+}
+
+.record-memo {
+    flex: 1;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin: 0 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.record-delete {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.record-delete:hover {
+    background: rgba(235, 87, 87, 0.1);
+    color: var(--danger);
+}
+
+/* 空の状態 */
+.empty-state {
+    text-align: center;
+    padding: 30px;
+    color: var(--text-light);
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: 12px;
+}
+
+.empty-state-text {
+    font-size: 0.9rem;
+}
+
+/* ========================================
+   グラフセクション
+   ======================================== */
+.chart-container {
+    padding: 16px;
+}
+
+.date-range {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.date-range span {
+    color: var(--text-secondary);
+}
+
+.chart-section {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-sm);
+}
+
+.chart-section h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 14px;
+}
+
+.chart-wrapper {
+    position: relative;
+    height: 200px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.action-btn {
+    flex: 1;
+    padding: 14px 20px;
+    background: var(--bg-card);
+    border: 2px solid var(--primary-light);
+    border-radius: var(--radius-lg);
+    color: var(--primary);
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.action-btn:hover {
+    background: var(--primary-light);
+    border-color: var(--primary);
+}
+
+/* 通院日リスト */
+.hospital-dates {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: var(--bg-section);
+    border-radius: var(--radius-sm);
+}
+
+.hospital-dates-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+}
+
+.hospital-dates-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.hospital-date-item {
+    background: rgba(235, 87, 87, 0.15);
+    color: var(--danger);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 500;
+    font-size: 0.75rem;
+}
+
+/* 診断タイムライン */
+.diagnosis-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    /* 高さ制限なし */
+}
+
+.diagnosis-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--bg-section);
+    border-radius: var(--radius-md);
+    border-left: 4px solid var(--danger);
+}
+
+.diagnosis-date {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--primary);
+    min-width: 50px;
+    flex-shrink: 0;
+}
+
+.diagnosis-content {
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    line-height: 1.4;
+}
+
+.diagnosis-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    background: var(--danger);
+    color: white;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-right: 6px;
+}
+
+/* 投薬タイムライン */
+.medicine-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.medicine-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.medicine-label {
+    width: 100px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.medicine-bar-container {
+    flex: 1;
+    display: flex;
+    height: 20px;
+    background: var(--bg-section);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.medicine-day {
+    flex: 1;
+    height: 100%;
+    border-right: 1px solid var(--bg-card);
+}
+
+.medicine-day.active {
+    background: var(--primary);
+}
+
+.medicine-day.hospital {
+    background: var(--danger);
+}
+
+.medicine-legend {
+    display: flex;
+    gap: 16px;
+    margin-top: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+}
+
+.legend-color.medicine {
+    background: var(--primary);
+}
+
+.legend-color.hospital {
+    background: var(--danger);
+}
+
+.legend-color.drip {
+    background: var(--info);
+}
+
+/* ========================================
+   トースト通知
+   ======================================== */
+.toast {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 24px;
+    background: var(--text-primary);
+    border-radius: var(--radius-xl);
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 500;
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.toast-icon {
+    font-size: 1.2rem;
+}
+
+/* ========================================
+   印刷用スタイル
+   ======================================== */
+@media print {
+    /* 基本設定 */
+    html, body {
+        width: 100% !important;
+        height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    /* 非表示にする要素 */
+    .app-header,
+    .tab-nav,
+    .submit-btn,
+    .action-buttons,
+    .quick-add-section,
+    .toast,
+    .chart-controls {
+        display: none !important;
+    }
+    
+    /* グラフタブのみ表示 */
+    .tab-content {
+        display: none !important;
+    }
+    
+    #chart-tab {
+        display: block !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    /* コンテナを全幅に */
+    .app-container {
+        width: 100% !important;
+        max-width: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        background: #fff !important;
+    }
+    
+    .main-content {
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    /* グラフセクションのスタイル */
+    .chart-section {
+        width: 100% !important;
+        box-sizing: border-box !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        box-shadow: none !important;
+        border: 1px solid #999 !important;
+        margin: 0 0 8px 0 !important;
+        padding: 6px !important;
+        background: #fff !important;
+        border-radius: 0 !important;
+    }
+    
+    .chart-section h3 {
+        font-size: 10px !important;
+        margin: 0 0 4px 0 !important;
+        padding: 0 !important;
+        color: #333 !important;
+    }
+    
+    .chart-wrapper {
+        width: 100% !important;
+        height: 180px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    .chart-wrapper canvas {
+        width: 100% !important;
+        height: 100% !important;
+    }
+    
+    /* イベントリストのスタイル */
+    .events-section {
+        page-break-inside: avoid !important;
+    }
+    
+    .events-list {
+        max-height: none !important;
+        overflow: visible !important;
+        padding: 4px !important;
+        background: #fff !important;
+    }
+    
+    .events-list li {
+        font-size: 8px !important;
+        padding: 1px 0 !important;
+    }
+    
+    /* ページ設定 */
+    @page {
+        size: A4 portrait;
+        margin: 5mm;
+    }
+    
+    /* 印刷用ヘッダー */
+    #chart-tab::before {
+        content: "🐱 にゃん健康手帳 - グラフレポート";
+        display: block;
+        width: 100%;
+        font-size: 12px;
+        font-weight: bold;
+        text-align: center;
+        margin: 0 0 8px 0;
+        padding: 0 0 5px 0;
+        border-bottom: 1px solid #333;
+    }
+}
+
+/* ========================================
+   レスポンシブ（タブレット以上）
+   ======================================== */
+@media (min-width: 768px) {
+    .app-container {
+        max-width: 600px;
+    }
+    
+    .medicine-checklist {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .quick-btns {
+        gap: 16px;
+    }
+    
+    .quick-btn {
+        padding: 20px 16px;
+    }
+}
+
+/* ========================================
+   点滴量表示切り替え
+   ======================================== */
+#drip-amount-row {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--bg-section);
+}
+
+/* タイミンググループ */
+.timing-group {
+    justify-content: center;
+}
+
+.timing-group .radio-btn span {
+    padding: 12px 24px;
+    font-size: 0.95rem;
+}
+
+/* ========================================
+   スクロールバー
+   ======================================== */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-section);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-light);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+}
+
+/* ========================================
+   尿検査 定性+定量入力
+   ======================================== */
+.qualitative-input {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.qual-select {
+    width: 60px;
+    padding: 10px 8px;
+    border: 2px solid var(--bg-section);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: center;
+}
+
+.qual-select:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.qual-select:hover {
+    border-color: var(--primary-light);
+}
+
+.qualitative-input .input-group {
+    flex: 1;
+}
+
+/* 定性結果に応じた色分け */
+.qual-select option[value="-"] { color: var(--success); }
+.qual-select option[value="+-"] { color: var(--warning); }
+.qual-select option[value="+"] { color: var(--warning); }
+.qual-select option[value="++"] { color: var(--danger); }
+.qual-select option[value="+++"] { color: var(--danger); }
+

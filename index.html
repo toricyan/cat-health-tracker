@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🐱 にゃん健康手帳</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- ヘッダー -->
+        <header class="app-header">
+            <div class="header-content">
+                <h1>🐱 にゃん健康手帳</h1>
+                <div class="cat-selector">
+                    <button class="cat-btn active" data-cat="lucky">
+                        <span class="cat-icon">🐈</span>
+                        <span class="cat-name">ラッキー</span>
+                    </button>
+                    <button class="cat-btn" data-cat="mi">
+                        <span class="cat-icon">🐈‍⬛</span>
+                        <span class="cat-name">ミー</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- メインコンテンツ -->
+        <main class="main-content">
+            <!-- タブナビゲーション -->
+            <nav class="tab-nav">
+                <button class="tab-btn active" data-tab="daily">
+                    <span class="tab-icon">📋</span>
+                    <span class="tab-label">日次記録</span>
+                </button>
+                <button class="tab-btn" data-tab="toilet">
+                    <span class="tab-icon">🚽</span>
+                    <span class="tab-label">排泄</span>
+                </button>
+                <button class="tab-btn" data-tab="medicine">
+                    <span class="tab-icon">💊</span>
+                    <span class="tab-label">投薬</span>
+                </button>
+                <button class="tab-btn" data-tab="hospital">
+                    <span class="tab-icon">🏥</span>
+                    <span class="tab-label">診察</span>
+                </button>
+                <button class="tab-btn" data-tab="labtest">
+                    <span class="tab-icon">🔬</span>
+                    <span class="tab-label">検査</span>
+                </button>
+                <button class="tab-btn" data-tab="chart">
+                    <span class="tab-icon">📊</span>
+                    <span class="tab-label">グラフ</span>
+                </button>
+            </nav>
+
+            <!-- 日次記録タブ -->
+            <section class="tab-content active" id="daily-tab">
+                <form id="daily-form" class="record-form">
+                    <div class="form-header">
+                        <h2>📅 日次記録</h2>
+                        <input type="date" id="daily-date" class="date-input">
+                    </div>
+
+                    <div class="form-section">
+                        <h3>😺 体調</h3>
+                        <div class="form-row">
+                            <label>体重</label>
+                            <div class="input-group">
+                                <input type="number" id="weight" step="0.1" min="0" max="20" placeholder="4.0">
+                                <span class="unit">kg</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>元気度</label>
+                            <div class="radio-group">
+                                <label class="radio-btn">
+                                    <input type="radio" name="energy" value="good">
+                                    <span>😸 元気</span>
+                                </label>
+                                <label class="radio-btn">
+                                    <input type="radio" name="energy" value="normal">
+                                    <span>😺 普通</span>
+                                </label>
+                                <label class="radio-btn">
+                                    <input type="radio" name="energy" value="low">
+                                    <span>😿 低下</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>食欲</label>
+                            <div class="radio-group">
+                                <label class="radio-btn">
+                                    <input type="radio" name="appetite" value="good">
+                                    <span>😋 増</span>
+                                </label>
+                                <label class="radio-btn">
+                                    <input type="radio" name="appetite" value="normal">
+                                    <span>😺 普通</span>
+                                </label>
+                                <label class="radio-btn">
+                                    <input type="radio" name="appetite" value="low">
+                                    <span>😿 減</span>
+                                </label>
+                                <label class="radio-btn">
+                                    <input type="radio" name="appetite" value="none">
+                                    <span>🙀 なし</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>🍽️ 摂取量</h3>
+                        <div class="form-row">
+                            <label>飲水量</label>
+                            <div class="input-group">
+                                <input type="number" id="water" min="0" max="500" placeholder="200">
+                                <span class="unit">cc</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>カリカリ</label>
+                            <div class="input-group">
+                                <input type="number" id="dry-food" min="0" max="200" placeholder="30">
+                                <span class="unit">g</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>ウェット</label>
+                            <div class="input-group">
+                                <input type="number" id="wet-food" min="0" max="200" placeholder="20">
+                                <span class="unit">g</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>チュール</label>
+                            <div class="input-group">
+                                <input type="number" id="churu" step="0.5" min="0" max="10" placeholder="1">
+                                <span class="unit">本</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>おやつ</label>
+                            <div class="input-group">
+                                <input type="number" id="treats" min="0" max="20" placeholder="1">
+                                <span class="unit">袋</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>🚽 排泄サマリー</h3>
+                        <div class="form-row">
+                            <label>尿回数</label>
+                            <div class="input-group">
+                                <input type="number" id="urine-count" min="0" max="50" placeholder="10">
+                                <span class="unit">回</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>便回数</label>
+                            <div class="input-group">
+                                <input type="number" id="feces-count" min="0" max="10" placeholder="1">
+                                <span class="unit">回</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>便の状態</label>
+                            <div class="radio-group">
+                                <label class="radio-btn">
+                                    <input type="radio" name="feces-condition" value="good">
+                                    <span>👍 良好</span>
+                                </label>
+                                <label class="radio-btn">
+                                    <input type="radio" name="feces-condition" value="hard">
+                                    <span>🔘 硬い</span>
+                                </label>
+                                <label class="radio-btn">
+                                    <input type="radio" name="feces-condition" value="soft">
+                                    <span>💧 柔らかい</span>
+                                </label>
+                                <label class="radio-btn">
+                                    <input type="radio" name="feces-condition" value="none">
+                                    <span>❌ なし</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>📝 メモ</h3>
+                        <textarea id="daily-memo" rows="3" placeholder="気になったことなど..."></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        <span>💾 保存する</span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- 排泄詳細タブ -->
+            <section class="tab-content" id="toilet-tab">
+                <form id="toilet-form" class="record-form">
+                    <div class="form-header">
+                        <h2>🚽 排泄記録</h2>
+                        <input type="date" id="toilet-date" class="date-input">
+                    </div>
+
+                    <div class="quick-add-section">
+                        <h3>⚡ クイック登録</h3>
+                        <div class="quick-btns">
+                            <button type="button" class="quick-btn urine" id="quick-urine">
+                                <span class="quick-icon">💧</span>
+                                <span class="quick-label">おしっこ</span>
+                            </button>
+                            <button type="button" class="quick-btn feces" id="quick-feces">
+                                <span class="quick-icon">💩</span>
+                                <span class="quick-label">うんち</span>
+                            </button>
+                            <button type="button" class="quick-btn both" id="quick-both">
+                                <span class="quick-icon">💧💩</span>
+                                <span class="quick-label">両方</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>📝 詳細入力</h3>
+                        <div class="form-row">
+                            <label>時刻</label>
+                            <input type="time" id="toilet-time" class="time-input">
+                        </div>
+                        <div class="form-row">
+                            <label>種類</label>
+                            <div class="radio-group">
+                                <label class="radio-btn">
+                                    <input type="radio" name="toilet-type" value="urine">
+                                    <span>💧 尿</span>
+                                </label>
+                                <label class="radio-btn">
+                                    <input type="radio" name="toilet-type" value="feces">
+                                    <span>💩 便</span>
+                                </label>
+                                <label class="radio-btn">
+                                    <input type="radio" name="toilet-type" value="both">
+                                    <span>両方</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>量</label>
+                            <div class="radio-group">
+                                <label class="radio-btn">
+                                    <input type="radio" name="toilet-amount" value="normal">
+                                    <span>普通</span>
+                                </label>
+                                <label class="radio-btn">
+                                    <input type="radio" name="toilet-amount" value="more">
+                                    <span>多め</span>
+                                </label>
+                                <label class="radio-btn">
+                                    <input type="radio" name="toilet-amount" value="less">
+                                    <span>少量</span>
+                                </label>
+                                <label class="radio-btn">
+                                    <input type="radio" name="toilet-amount" value="drops">
+                                    <span>数滴</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>メモ</label>
+                            <input type="text" id="toilet-memo" placeholder="血尿、色など...">
+                        </div>
+                        <button type="submit" class="submit-btn secondary">
+                            <span>➕ 追加する</span>
+                        </button>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>📋 今日の記録</h3>
+                        <div id="toilet-list" class="record-list">
+                            <!-- 動的に追加される -->
+                        </div>
+                    </div>
+                </form>
+            </section>
+
+            <!-- 投薬タブ -->
+            <section class="tab-content" id="medicine-tab">
+                <form id="medicine-form" class="record-form">
+                    <div class="form-header">
+                        <h2>💊 投薬記録</h2>
+                        <input type="date" id="medicine-date" class="date-input">
+                    </div>
+
+                    <div class="form-section">
+                        <h3>💊 処方薬</h3>
+                        <div class="medicine-checklist">
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="medicine" value="rapros">
+                                <span class="checkbox-custom"></span>
+                                <span class="checkbox-label">ラプロス</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="medicine" value="lactulose">
+                                <span class="checkbox-custom"></span>
+                                <span class="checkbox-label">ラクツロース</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="medicine" value="clavaseptin">
+                                <span class="checkbox-custom"></span>
+                                <span class="checkbox-label">クラバセプチン</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="medicine" value="vibramycin">
+                                <span class="checkbox-custom"></span>
+                                <span class="checkbox-label">ビブラマイシン</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="medicine" value="veraflox">
+                                <span class="checkbox-custom"></span>
+                                <span class="checkbox-label">ベラフロックス</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="medicine" value="appetite">
+                                <span class="checkbox-custom"></span>
+                                <span class="checkbox-label">ミルタザビン（食欲増進薬）</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>🌿 サプリメント</h3>
+                        <div class="medicine-checklist">
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="medicine" value="cranberry">
+                                <span class="checkbox-custom"></span>
+                                <span class="checkbox-label">クランベリBB</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="medicine" value="uroact">
+                                <span class="checkbox-custom"></span>
+                                <span class="checkbox-label">ウロアクト</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="medicine" value="utclean">
+                                <span class="checkbox-custom"></span>
+                                <span class="checkbox-label">UT Clean</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>🕐 タイミング</h3>
+                        <div class="radio-group timing-group">
+                            <label class="radio-btn">
+                                <input type="radio" name="timing" value="morning">
+                                <span>🌅 朝</span>
+                            </label>
+                            <label class="radio-btn">
+                                <input type="radio" name="timing" value="noon">
+                                <span>☀️ 昼</span>
+                            </label>
+                            <label class="radio-btn">
+                                <input type="radio" name="timing" value="evening">
+                                <span>🌙 夜</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>📝 その他の薬・メモ</h3>
+                        <textarea id="medicine-memo" rows="2" placeholder="ステロイド、痛み止めなど..."></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        <span>💾 保存する</span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- 診察タブ -->
+            <section class="tab-content" id="hospital-tab">
+                <form id="hospital-form" class="record-form">
+                    <div class="form-header">
+                        <h2>🏥 診察記録</h2>
+                        <input type="datetime-local" id="hospital-datetime" class="date-input">
+                    </div>
+
+                    <div class="form-section">
+                        <h3>🩺 診察内容</h3>
+                        <div class="form-row">
+                            <label>体重</label>
+                            <div class="input-group">
+                                <input type="number" id="hospital-weight" step="0.1" min="0" max="20" placeholder="4.0">
+                                <span class="unit">kg</span>
+                            </div>
+                        </div>
+                        <div class="medicine-checklist">
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="treatment" value="drip">
+                                <span class="checkbox-custom"></span>
+                                <span class="checkbox-label">点滴</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="treatment" value="echo">
+                                <span class="checkbox-custom"></span>
+                                <span class="checkbox-label">エコー検査</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="treatment" value="blood">
+                                <span class="checkbox-custom"></span>
+                                <span class="checkbox-label">血液検査</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="treatment" value="urine">
+                                <span class="checkbox-custom"></span>
+                                <span class="checkbox-label">尿検査</span>
+                            </label>
+                        </div>
+                        <div class="form-row" id="drip-amount-row" style="display:none;">
+                            <label>点滴量</label>
+                            <div class="input-group">
+                                <input type="number" id="drip-amount" min="0" max="500" placeholder="200">
+                                <span class="unit">cc</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>📋 所見・診断</h3>
+                        <textarea id="diagnosis" rows="4" placeholder="先生のお話、診断内容など..."></textarea>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>💊 処方された薬</h3>
+                        <textarea id="prescription" rows="3" placeholder="新しく処方された薬、投薬指示など..."></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        <span>💾 保存する</span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- 検査結果タブ -->
+            <section class="tab-content" id="labtest-tab">
+                <form id="labtest-form" class="record-form">
+                    <div class="form-header">
+                        <h2>🔬 検査結果</h2>
+                        <input type="date" id="labtest-date" class="date-input">
+                    </div>
+
+                    <div class="form-section">
+                        <h3>🩸 血液検査（CBC）</h3>
+                        <div class="form-row">
+                            <label>白血球数</label>
+                            <div class="input-group">
+                                <input type="number" id="wbc" step="100" min="0" max="100000" placeholder="10000">
+                                <span class="unit">個/μl</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>ヘマトクリット</label>
+                            <div class="input-group">
+                                <input type="number" id="hct" step="0.1" min="0" max="100" placeholder="35">
+                                <span class="unit">%</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>血小板数</label>
+                            <div class="input-group">
+                                <input type="number" id="plt" step="0.1" min="0" max="100" placeholder="30">
+                                <span class="unit">万個/μl</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>🧪 血液生化学</h3>
+                        <div class="form-row">
+                            <label>血糖値</label>
+                            <div class="input-group">
+                                <input type="number" id="glucose" step="1" min="0" max="500" placeholder="100">
+                                <span class="unit">mg/dl</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>総蛋白</label>
+                            <div class="input-group">
+                                <input type="number" id="tp" step="0.1" min="0" max="15" placeholder="7.0">
+                                <span class="unit">g/dl</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>アルブミン</label>
+                            <div class="input-group">
+                                <input type="number" id="alb" step="0.1" min="0" max="10" placeholder="3.0">
+                                <span class="unit">g/dl</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>尿素窒素(BUN)</label>
+                            <div class="input-group">
+                                <input type="number" id="bun" step="0.1" min="0" max="200" placeholder="25">
+                                <span class="unit">mg/dl</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>クレアチニン</label>
+                            <div class="input-group">
+                                <input type="number" id="creatinine" step="0.01" min="0" max="20" placeholder="1.6">
+                                <span class="unit">mg/dl</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>総ビリルビン</label>
+                            <div class="input-group">
+                                <input type="number" id="tbil" step="0.01" min="0" max="10" placeholder="0.2">
+                                <span class="unit">mg/dl</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>AST</label>
+                            <div class="input-group">
+                                <input type="number" id="ast" step="1" min="0" max="500" placeholder="30">
+                                <span class="unit">IU/L</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>ALT</label>
+                            <div class="input-group">
+                                <input type="number" id="alt" step="1" min="0" max="500" placeholder="50">
+                                <span class="unit">IU/L</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>ALP</label>
+                            <div class="input-group">
+                                <input type="number" id="alp" step="1" min="0" max="500" placeholder="40">
+                                <span class="unit">IU/L</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>リパーゼ</label>
+                            <div class="input-group">
+                                <input type="number" id="lipase" step="1" min="0" max="500" placeholder="20">
+                                <span class="unit">IU/L</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>CPK</label>
+                            <div class="input-group">
+                                <input type="number" id="cpk" step="1" min="0" max="1000" placeholder="150">
+                                <span class="unit">IU/L</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>カルシウム</label>
+                            <div class="input-group">
+                                <input type="number" id="calcium" step="0.1" min="0" max="20" placeholder="10">
+                                <span class="unit">mg/dl</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>リン</label>
+                            <div class="input-group">
+                                <input type="number" id="phosphorus" step="0.1" min="0" max="20" placeholder="5.0">
+                                <span class="unit">mg/dl</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>Na</label>
+                            <div class="input-group">
+                                <input type="number" id="sodium" step="1" min="0" max="200" placeholder="150">
+                                <span class="unit">mmol/l</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>K</label>
+                            <div class="input-group">
+                                <input type="number" id="potassium" step="0.1" min="0" max="10" placeholder="4.0">
+                                <span class="unit">mmol/l</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>Cl</label>
+                            <div class="input-group">
+                                <input type="number" id="chloride" step="1" min="0" max="150" placeholder="115">
+                                <span class="unit">mmol/l</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>💧 尿検査</h3>
+                        <div class="form-row">
+                            <label>ブドウ糖</label>
+                            <div class="qualitative-input">
+                                <select id="urine-glucose-qual" class="qual-select">
+                                    <option value="">--</option>
+                                    <option value="-">−</option>
+                                    <option value="+-">±</option>
+                                    <option value="+">+</option>
+                                    <option value="++">++</option>
+                                    <option value="+++">+++</option>
+                                </select>
+                                <div class="input-group">
+                                    <input type="number" id="urine-glucose" step="1" min="0" max="1000" placeholder="数値">
+                                    <span class="unit">mg/dl</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>蛋白質</label>
+                            <div class="qualitative-input">
+                                <select id="urine-protein-qual" class="qual-select">
+                                    <option value="">--</option>
+                                    <option value="-">−</option>
+                                    <option value="+-">±</option>
+                                    <option value="+">+</option>
+                                    <option value="++">++</option>
+                                    <option value="+++">+++</option>
+                                </select>
+                                <div class="input-group">
+                                    <input type="number" id="urine-protein" step="1" min="0" max="1000" placeholder="数値">
+                                    <span class="unit">mg/dl</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>ビリルビン</label>
+                            <div class="qualitative-input">
+                                <select id="urine-bilirubin-qual" class="qual-select">
+                                    <option value="">--</option>
+                                    <option value="-">−</option>
+                                    <option value="+-">±</option>
+                                    <option value="+">+</option>
+                                    <option value="++">++</option>
+                                    <option value="+++">+++</option>
+                                </select>
+                                <div class="input-group">
+                                    <input type="number" id="urine-bilirubin" step="0.1" min="0" max="100" placeholder="数値">
+                                    <span class="unit">mg/dl</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>pH</label>
+                            <div class="input-group">
+                                <input type="number" id="urine-ph" step="0.1" min="4" max="9" placeholder="6.5">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>比重</label>
+                            <div class="input-group">
+                                <input type="number" id="urine-sg" step="0.001" min="1.000" max="1.100" placeholder="1.035">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>潜血</label>
+                            <div class="qualitative-input">
+                                <select id="urine-blood-qual" class="qual-select">
+                                    <option value="">--</option>
+                                    <option value="-">−</option>
+                                    <option value="+-">±</option>
+                                    <option value="+">+</option>
+                                    <option value="++">++</option>
+                                    <option value="+++">+++</option>
+                                </select>
+                                <div class="input-group">
+                                    <input type="number" id="urine-blood" step="0.01" min="0" max="10" placeholder="数値">
+                                    <span class="unit">mg/dl</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>ケトン体</label>
+                            <div class="qualitative-input">
+                                <select id="urine-ketone-qual" class="qual-select">
+                                    <option value="">--</option>
+                                    <option value="-">−</option>
+                                    <option value="+-">±</option>
+                                    <option value="+">+</option>
+                                    <option value="++">++</option>
+                                    <option value="+++">+++</option>
+                                </select>
+                                <div class="input-group">
+                                    <input type="number" id="urine-ketone" step="1" min="0" max="1000" placeholder="数値">
+                                    <span class="unit">mg/dl</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>亜硝酸塩</label>
+                            <div class="radio-group">
+                                <label class="radio-btn">
+                                    <input type="radio" name="urine-nitrite" value="negative">
+                                    <span>−</span>
+                                </label>
+                                <label class="radio-btn">
+                                    <input type="radio" name="urine-nitrite" value="positive">
+                                    <span>+</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>白血球</label>
+                            <div class="input-group">
+                                <input type="number" id="urine-wbc" step="1" min="0" max="10000" placeholder="0">
+                                <span class="unit">個/μl</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>📝 備考</h3>
+                        <textarea id="labtest-memo" rows="3" placeholder="検査結果の所見など..."></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        <span>💾 保存する</span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- グラフタブ -->
+            <section class="tab-content" id="chart-tab">
+                <div class="chart-container">
+                    <div class="form-header">
+                        <h2>📊 健康グラフ</h2>
+                        <div class="date-range">
+                            <input type="date" id="chart-start" class="date-input">
+                            <span>〜</span>
+                            <input type="date" id="chart-end" class="date-input">
+                        </div>
+                    </div>
+
+                    <div class="chart-section">
+                        <h3>🏥 通院・点滴</h3>
+                        <div class="chart-wrapper" style="height: 100px;">
+                            <canvas id="hospital-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-section">
+                        <h3>🚽 排尿回数</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="urine-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-section">
+                        <h3>🍽️ 食事量</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="food-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-section">
+                        <h3>💊 投薬タイムライン</h3>
+                        <div class="medicine-timeline" id="medicine-timeline">
+                            <!-- 動的に生成 -->
+                        </div>
+                    </div>
+
+                    <div class="chart-section">
+                        <h3>💧 飲水量</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="water-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-section">
+                        <h3>📈 体重の推移</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="weight-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-section">
+                        <h3>🔬 腎機能（クレアチニン・BUN）</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="kidney-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-section">
+                        <h3>💧 尿検査（蛋白質・潜血・比重）</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="urine-test-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-section">
+                        <h3>📋 診断・イベント</h3>
+                        <div class="diagnosis-timeline" id="diagnosis-timeline">
+                            <!-- 動的に生成 -->
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button type="button" class="action-btn" id="export-btn">
+                            <span>📥 データ出力</span>
+                        </button>
+                        <button type="button" class="action-btn" id="print-btn">
+                            <span>🖨️ 印刷用表示</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- 保存成功トースト -->
+        <div class="toast" id="toast">
+            <span class="toast-icon">✅</span>
+            <span class="toast-message">保存しました！</span>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
+

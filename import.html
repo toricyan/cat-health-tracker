@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📥 データインポート - にゃん健康手帳</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        .import-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .import-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .import-header h1 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .import-section {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .import-section h2 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            margin-bottom: 15px;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .file-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 20px;
+            background: var(--bg-section);
+            border: 2px dashed var(--primary-light);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .file-label:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+        
+        .file-name {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        .preview-area {
+            background: var(--bg-section);
+            border-radius: var(--radius-md);
+            padding: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 0.85rem;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        .import-result {
+            padding: 15px;
+            border-radius: var(--radius-md);
+            margin-top: 15px;
+        }
+        
+        .import-result.success {
+            background: rgba(107, 191, 138, 0.15);
+            color: var(--success);
+        }
+        
+        .import-result.error {
+            background: rgba(235, 87, 87, 0.15);
+            color: var(--danger);
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .stat-item {
+            background: var(--bg-section);
+            padding: 12px;
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="import-container">
+        <a href="index.html" class="back-link">← アプリに戻る</a>
+        
+        <div class="import-header">
+            <h1>📥 データインポート</h1>
+            <p>過去のデータをCSVまたはJSONファイルからインポートできます</p>
+        </div>
+
+        <!-- CSV インポート -->
+        <div class="import-section">
+            <h2>📄 CSVファイルからインポート</h2>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 15px;">
+                日次記録のCSVファイルをインポートします。
+                <a href="data/lucky-daily.csv" download style="color: var(--primary);">サンプルCSV</a>
+            </p>
+            
+            <div class="file-input-wrapper">
+                <input type="file" id="csv-file" class="file-input" accept=".csv">
+                <label for="csv-file" class="file-label">
+                    <span style="font-size: 2rem;">📄</span>
+                    <span>CSVファイルを選択またはドロップ</span>
+                </label>
+                <div class="file-name" id="csv-file-name"></div>
+            </div>
+            
+            <div class="form-row" style="margin-bottom: 15px;">
+                <label style="width: auto; margin-right: 10px;">対象の猫:</label>
+                <select id="csv-cat" style="padding: 10px; border-radius: 8px; border: 2px solid var(--bg-section);">
+                    <option value="lucky">ラッキー</option>
+                    <option value="mi">ミー</option>
+                </select>
+            </div>
+            
+            <button class="submit-btn" onclick="importCSV()">
+                インポート実行
+            </button>
+            
+            <div id="csv-result"></div>
+        </div>
+
+        <!-- 投薬CSV インポート -->
+        <div class="import-section">
+            <h2>💊 投薬CSVからインポート</h2>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 15px;">
+                投薬記録のCSVファイルをインポートします。
+                <a href="data/lucky-medicine.csv" download style="color: var(--primary);">サンプルCSV</a>
+            </p>
+            
+            <div class="file-input-wrapper">
+                <input type="file" id="medicine-file" class="file-input" accept=".csv">
+                <label for="medicine-file" class="file-label">
+                    <span style="font-size: 2rem;">💊</span>
+                    <span>投薬CSVファイルを選択</span>
+                </label>
+                <div class="file-name" id="medicine-file-name"></div>
+            </div>
+            
+            <button class="submit-btn" style="background: linear-gradient(135deg, #7CBAAB 0%, #5a9a8b 100%);" onclick="importMedicineCSV()">
+                インポート実行
+            </button>
+            
+            <div id="medicine-result"></div>
+        </div>
+
+        <!-- JSON インポート -->
+        <div class="import-section">
+            <h2>📋 JSONファイルからインポート</h2>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 15px;">
+                エクスポートしたJSONデータを復元します。
+            </p>
+            
+            <div class="file-input-wrapper">
+                <input type="file" id="json-file" class="file-input" accept=".json">
+                <label for="json-file" class="file-label">
+                    <span style="font-size: 2rem;">📋</span>
+                    <span>JSONファイルを選択またはドロップ</span>
+                </label>
+                <div class="file-name" id="json-file-name"></div>
+            </div>
+            
+            <button class="submit-btn secondary" onclick="importJSON()">
+                インポート実行
+            </button>
+            
+            <div id="json-result"></div>
+        </div>
+
+        <!-- 現在のデータ統計 -->
+        <div class="import-section">
+            <h2>📊 現在のデータ</h2>
+            <div class="stats" id="data-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="daily-count">0</div>
+                    <div class="stat-label">日次記録</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="toilet-count">0</div>
+                    <div class="stat-label">排泄記録</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="medicine-count">0</div>
+                    <div class="stat-label">投薬記録</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="hospital-count">0</div>
+                    <div class="stat-label">診察記録</div>
+                </div>
+            </div>
+            
+            <button class="submit-btn" style="background: var(--danger); margin-top: 20px;" onclick="clearAllData()">
+                ⚠️ 全データを削除
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ストレージキー
+        const STORAGE_KEYS = {
+            DAILY: 'catHealth_daily',
+            TOILET: 'catHealth_toilet',
+            MEDICINE: 'catHealth_medicine',
+            HOSPITAL: 'catHealth_hospital'
+        };
+
+        // ファイル選択時の処理
+        document.getElementById('csv-file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('csv-file-name').textContent = file.name;
+            }
+        });
+
+        document.getElementById('json-file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('json-file-name').textContent = file.name;
+            }
+        });
+
+        document.getElementById('medicine-file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('medicine-file-name').textContent = file.name;
+            }
+        });
+
+        // CSVインポート
+        async function importCSV() {
+            const fileInput = document.getElementById('csv-file');
+            const catId = document.getElementById('csv-cat').value;
+            const resultDiv = document.getElementById('csv-result');
+            
+            if (!fileInput.files[0]) {
+                resultDiv.innerHTML = '<div class="import-result error">ファイルを選択してください</div>';
+                return;
+            }
+            
+            try {
+                const text = await fileInput.files[0].text();
+                const lines = text.split('\n').filter(line => line.trim());
+                const headers = lines[0].split(',');
+                
+                let imported = 0;
+                const dailyData = JSON.parse(localStorage.getItem(STORAGE_KEYS.DAILY) || '{}');
+                
+                for (let i = 1; i < lines.length; i++) {
+                    const values = parseCSVLine(lines[i]);
+                    if (values.length < 5) continue;
+                    
+                    const date = formatDate(values[0]);
+                    const key = `${catId}_${date}`;
+                    
+                    dailyData[key] = {
+                        cat: catId,
+                        date: date,
+                        weight: values[2] || '',
+                        energy: convertEnergy(values[3]),
+                        appetite: convertAppetite(values[4]),
+                        water: values[5] || '',
+                        dryFood: values[6] || '',
+                        wetFood: values[7] || '',
+                        churu: values[8] || '',
+                        treats: values[9] || '',
+                        urineCount: values[10] || '',
+                        fecesCount: values[11] || '',
+                        fecesCondition: convertFecesCondition(values[12]),
+                        drip: values[13] || '',
+                        memo: values[14] || '',
+                        updatedAt: new Date().toISOString()
+                    };
+                    imported++;
+                }
+                
+                localStorage.setItem(STORAGE_KEYS.DAILY, JSON.stringify(dailyData));
+                
+                resultDiv.innerHTML = `<div class="import-result success">✅ ${imported}件のデータをインポートしました</div>`;
+                updateStats();
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="import-result error">❌ エラー: ${error.message}</div>`;
+            }
+        }
+
+        // CSVの1行をパース（カンマ区切り、クォート対応）
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current.trim());
+            
+            return result;
+        }
+
+        // 日付フォーマット変換
+        function formatDate(dateStr) {
+            // 2025/11/15 -> 2025-11-15
+            return dateStr.replace(/\//g, '-');
+        }
+
+        // 値変換関数
+        function convertEnergy(value) {
+            const map = { '元気': 'good', '普通': 'normal', '低下': 'low' };
+            return map[value] || value;
+        }
+        
+        function convertAppetite(value) {
+            const map = { '増': 'good', '普通': 'normal', '減': 'low', 'なし': 'none' };
+            return map[value] || value;
+        }
+        
+        function convertFecesCondition(value) {
+            const map = { '良好': 'good', '硬い': 'hard', '柔らかい': 'soft', 'なし': 'none' };
+            return map[value] || value;
+        }
+
+        // 投薬CSVインポート
+        async function importMedicineCSV() {
+            const fileInput = document.getElementById('medicine-file');
+            const resultDiv = document.getElementById('medicine-result');
+            
+            if (!fileInput.files[0]) {
+                resultDiv.innerHTML = '<div class="import-result error">ファイルを選択してください</div>';
+                return;
+            }
+            
+            try {
+                const text = await fileInput.files[0].text();
+                const lines = text.split('\n').filter(line => line.trim());
+                
+                let imported = 0;
+                const medicineData = JSON.parse(localStorage.getItem(STORAGE_KEYS.MEDICINE) || '{}');
+                
+                // ヘッダーをスキップして各行を処理
+                for (let i = 1; i < lines.length; i++) {
+                    const values = parseCSVLine(lines[i]);
+                    if (values.length < 4) continue;
+                    
+                    const date = formatDate(values[0]);
+                    const cat = values[1] === 'ラッキー' ? 'lucky' : 'mi';
+                    const timing = convertTiming(values[2]);
+                    
+                    const key = `${cat}_${date}_${timing}`;
+                    
+                    // 薬のリスト
+                    const medicines = [];
+                    if (values[3] === 'TRUE') medicines.push('rapros');
+                    if (values[4] === 'TRUE') medicines.push('lactulose');
+                    if (values[5] === 'TRUE') medicines.push('cranberry');
+                    if (values[6] === 'TRUE') medicines.push('clavaseptin');
+                    if (values[7] === 'TRUE') medicines.push('vibramycin');
+                    if (values[8] === 'TRUE') medicines.push('uroact');
+                    if (values[9] === 'TRUE') medicines.push('utclean');
+                    if (values[10] === 'TRUE') medicines.push('veraflox');
+                    if (values[11] === 'TRUE') medicines.push('appetite');
+                    
+                    medicineData[key] = {
+                        cat: cat,
+                        date: date,
+                        timing: timing,
+                        medicines: medicines,
+                        memo: values[12] || '',
+                        updatedAt: new Date().toISOString()
+                    };
+                    imported++;
+                }
+                
+                localStorage.setItem(STORAGE_KEYS.MEDICINE, JSON.stringify(medicineData));
+                
+                resultDiv.innerHTML = `<div class="import-result success">✅ ${imported}件の投薬記録をインポートしました</div>`;
+                updateStats();
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="import-result error">❌ エラー: ${error.message}</div>`;
+            }
+        }
+
+        function convertTiming(value) {
+            const map = { '朝': 'morning', '昼': 'noon', '夜': 'evening' };
+            return map[value] || value;
+        }
+
+        // JSONインポート
+        async function importJSON() {
+            const fileInput = document.getElementById('json-file');
+            const resultDiv = document.getElementById('json-result');
+            
+            if (!fileInput.files[0]) {
+                resultDiv.innerHTML = '<div class="import-result error">ファイルを選択してください</div>';
+                return;
+            }
+            
+            try {
+                const text = await fileInput.files[0].text();
+                const data = JSON.parse(text);
+                
+                let counts = { daily: 0, toilet: 0, medicine: 0, hospital: 0 };
+                
+                if (data.daily) {
+                    localStorage.setItem(STORAGE_KEYS.DAILY, JSON.stringify(data.daily));
+                    counts.daily = Object.keys(data.daily).length;
+                }
+                if (data.toilet) {
+                    localStorage.setItem(STORAGE_KEYS.TOILET, JSON.stringify(data.toilet));
+                    counts.toilet = Object.values(data.toilet).flat().length;
+                }
+                if (data.medicine) {
+                    localStorage.setItem(STORAGE_KEYS.MEDICINE, JSON.stringify(data.medicine));
+                    counts.medicine = Object.keys(data.medicine).length;
+                }
+                if (data.hospital) {
+                    localStorage.setItem(STORAGE_KEYS.HOSPITAL, JSON.stringify(data.hospital));
+                    counts.hospital = Object.keys(data.hospital).length;
+                }
+                
+                resultDiv.innerHTML = `
+                    <div class="import-result success">
+                        ✅ インポート完了<br>
+                        日次: ${counts.daily}件, 排泄: ${counts.toilet}件,<br>
+                        投薬: ${counts.medicine}件, 診察: ${counts.hospital}件
+                    </div>
+                `;
+                updateStats();
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="import-result error">❌ エラー: ${error.message}</div>`;
+            }
+        }
+
+        // 統計を更新
+        function updateStats() {
+            const daily = JSON.parse(localStorage.getItem(STORAGE_KEYS.DAILY) || '{}');
+            const toilet = JSON.parse(localStorage.getItem(STORAGE_KEYS.TOILET) || '{}');
+            const medicine = JSON.parse(localStorage.getItem(STORAGE_KEYS.MEDICINE) || '{}');
+            const hospital = JSON.parse(localStorage.getItem(STORAGE_KEYS.HOSPITAL) || '{}');
+            
+            document.getElementById('daily-count').textContent = Object.keys(daily).length;
+            document.getElementById('toilet-count').textContent = Object.values(toilet).flat().length;
+            document.getElementById('medicine-count').textContent = Object.keys(medicine).length;
+            document.getElementById('hospital-count').textContent = Object.keys(hospital).length;
+        }
+
+        // 全データ削除
+        function clearAllData() {
+            if (confirm('本当に全てのデータを削除しますか？\nこの操作は取り消せません。')) {
+                localStorage.removeItem(STORAGE_KEYS.DAILY);
+                localStorage.removeItem(STORAGE_KEYS.TOILET);
+                localStorage.removeItem(STORAGE_KEYS.MEDICINE);
+                localStorage.removeItem(STORAGE_KEYS.HOSPITAL);
+                updateStats();
+                alert('全データを削除しました');
+            }
+        }
+
+        // 初期化
+        updateStats();
+    </script>
+</body>
+</html>
+
