@@ -83,6 +83,23 @@ const Utils = {
         setTimeout(() => toast.classList.remove('show'), 2500);
     },
     
+    // ローディング表示
+    showLoading(message = '読み込み中...') {
+        const loading = document.getElementById('loading');
+        if (loading) {
+            loading.querySelector('.loading-text').textContent = message;
+            loading.classList.add('show');
+        }
+    },
+    
+    // ローディング非表示
+    hideLoading() {
+        const loading = document.getElementById('loading');
+        if (loading) {
+            loading.classList.remove('show');
+        }
+    },
+    
     // 一意のIDを生成
     generateId() {
         return Date.now().toString(36) + Math.random().toString(36).substr(2);
@@ -150,6 +167,32 @@ class DataManager {
     getDailyRecord(date, catId = APP_STATE.currentCat) {
         const key = this.getKey(date, catId);
         return this.dailyData[key] || null;
+    }
+    
+    // 日次データをスプレッドシートから取得（非同期）
+    async getDailyRecordFromSheet(date, catId = APP_STATE.currentCat) {
+        if (!USE_SPREADSHEET || !GAS_URL) return null;
+        
+        try {
+            const url = `${GAS_URL}?action=getDailyRecord&cat=${catId}&date=${date}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            if (data && !data.error) {
+                // ローカルストレージにも保存
+                const key = this.getKey(date, catId);
+                this.dailyData[key] = {
+                    ...data,
+                    cat: catId,
+                    date: date
+                };
+                Utils.saveData(STORAGE_KEYS.DAILY, this.dailyData);
+                return data;
+            }
+        } catch (error) {
+            console.error('スプレッドシートからのデータ取得エラー:', error);
+        }
+        return null;
     }
     
     // 排泄記録を追加
@@ -586,9 +629,19 @@ class UIController {
     }
     
     // 日次データを読み込み
-    loadDailyData() {
+    async loadDailyData() {
         const date = document.getElementById('daily-date').value;
-        const record = this.data.getDailyRecord(date);
+        let record = this.data.getDailyRecord(date);
+        
+        // ローカルストレージにデータがなければスプレッドシートから取得
+        if (!record) {
+            Utils.showLoading('データを取得中...');
+            try {
+                record = await this.data.getDailyRecordFromSheet(date);
+            } finally {
+                Utils.hideLoading();
+            }
+        }
         
         // 排泄タブのデータから回数を自動計算
         const toiletRecords = this.data.getToiletRecords(date);
@@ -915,6 +968,8 @@ class UIController {
         
         if (!startDate || !endDate) return;
         
+        Utils.showLoading('グラフを読み込み中...');
+        
         let data;
         try {
             data = await this.data.getDataForPeriod(startDate, endDate);
@@ -922,6 +977,8 @@ class UIController {
             console.error('データ取得エラー:', error);
             // エラー時はローカルストレージから取得
             data = this.data.getDataForPeriodSync(startDate, endDate);
+        } finally {
+            Utils.hideLoading();
         }
         
         if (!data || data.length === 0) {
