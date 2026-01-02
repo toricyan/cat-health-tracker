@@ -1117,7 +1117,7 @@ textarea::placeholder {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(253, 248, 245, 0.97);
+    background: rgba(253, 248, 245, 0.9);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1125,7 +1125,6 @@ textarea::placeholder {
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s, visibility 0.3s;
-    backdrop-filter: blur(4px);
 }
 
 .loading-overlay.show {
