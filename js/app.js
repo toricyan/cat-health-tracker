@@ -907,6 +907,23 @@ class UIController {
             const record = await response.json();
             
             if (record && !record.error) {
+                // 日時を反映（スプレッドシートのデータの時間に合わせる）
+                if (record.datetime) {
+                    let dt = record.datetime;
+                    // 日時形式を変換（"2026-01-03 10:10" → "2026-01-03T10:10"）
+                    if (typeof dt === 'string') {
+                        dt = dt.replace(' ', 'T');
+                        // 時間が1桁の場合（10:1 → 10:01）
+                        const match = dt.match(/T(\d+):(\d+)/);
+                        if (match) {
+                            const hour = match[1].padStart(2, '0');
+                            const min = match[2].padStart(2, '0');
+                            dt = dt.replace(/T\d+:\d+/, `T${hour}:${min}`);
+                        }
+                    }
+                    document.getElementById('hospital-datetime').value = dt;
+                }
+                
                 // フォームにデータを反映
                 document.getElementById('hospital-weight').value = record.weight || '';
                 document.getElementById('drip-amount').value = record.dripAmount || '';
