@@ -1174,3 +1174,18 @@ textarea::placeholder {
     font-weight: 500;
 }
 
+/* ========================================
+   読み取り専用入力・自動集計ラベル
+   ======================================== */
+.readonly-input {
+    background: var(--bg-section) !important;
+    color: var(--text-secondary);
+    cursor: not-allowed;
+}
+
+.auto-label {
+    font-size: 0.7rem;
+    font-weight: 400;
+    color: var(--text-light);
+}
+
