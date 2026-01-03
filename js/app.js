@@ -890,19 +890,32 @@ class UIController {
     // 診察フォームを保存
     saveHospitalForm() {
         const datetime = document.getElementById('hospital-datetime').value;
+        const date = datetime.split('T')[0]; // 日付部分を取得
         
         const treatments = Array.from(document.querySelectorAll('input[name="treatment"]:checked'))
             .map(cb => cb.value);
         
+        const dripAmount = treatments.includes('drip') ? document.getElementById('drip-amount').value : '';
+        
         const record = {
             weight: document.getElementById('hospital-weight').value,
             treatments: treatments,
-            dripAmount: treatments.includes('drip') ? document.getElementById('drip-amount').value : '',
+            dripAmount: dripAmount,
             diagnosis: document.getElementById('diagnosis').value,
             prescription: document.getElementById('prescription').value
         };
         
         this.data.saveHospitalRecord(datetime, record);
+        
+        // 点滴がある場合、日次記録にも反映
+        if (treatments.includes('drip') && dripAmount) {
+            const dailyRecord = this.data.getDailyRecord(date) || {};
+            dailyRecord.drip = dripAmount;
+            dailyRecord.memo = (dailyRecord.memo || '') + (dailyRecord.memo ? '\n' : '') + '【通院】' + (document.getElementById('diagnosis').value || '');
+            this.data.saveDailyRecord(date, dailyRecord);
+        }
+        
+        this.data.clearCache(); // キャッシュをクリア
         Utils.showToast('診察記録を保存しました！');
         
         // フォームリセット
