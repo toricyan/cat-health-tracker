@@ -33,9 +33,13 @@ const STORAGE_KEYS = {
 // ユーティリティ関数
 // ========================================
 const Utils = {
-    // 今日の日付をYYYY-MM-DD形式で取得
+    // 今日の日付をYYYY-MM-DD形式で取得（日本時間）
     getTodayDate() {
-        return new Date().toISOString().split('T')[0];
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     },
     
     // 現在時刻をHH:MM形式で取得
