@@ -912,17 +912,26 @@ class UIController {
                 if (record.datetime) {
                     let dt = record.datetime;
                     console.log('元の日時:', dt);
-                    // 日時形式を変換（"2026-01-03 10:10" → "2026-01-03T10:10"）
-                    if (typeof dt === 'string') {
-                        dt = dt.replace(' ', 'T');
-                        // 時間が1桁の場合（10:1 → 10:01）
-                        const match = dt.match(/T(\d+):(\d+)/);
-                        if (match) {
-                            const hour = match[1].padStart(2, '0');
-                            const min = match[2].padStart(2, '0');
-                            dt = dt.replace(/T\d+:\d+/, `T${hour}:${min}`);
+                    
+                    // 日時形式を "yyyy-MM-ddTHH:mm" に変換
+                    try {
+                        const dateObj = new Date(dt);
+                        if (!isNaN(dateObj.getTime())) {
+                            // Dateオブジェクトから変換
+                            const year = dateObj.getFullYear();
+                            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                            const day = String(dateObj.getDate()).padStart(2, '0');
+                            const hour = String(dateObj.getHours()).padStart(2, '0');
+                            const min = String(dateObj.getMinutes()).padStart(2, '0');
+                            dt = `${year}-${month}-${day}T${hour}:${min}`;
+                        } else if (typeof dt === 'string') {
+                            // 文字列から変換
+                            dt = dt.replace(' ', 'T').split('.')[0].substring(0, 16);
                         }
+                    } catch (e) {
+                        console.error('日時変換エラー:', e);
                     }
+                    
                     console.log('変換後の日時:', dt);
                     document.getElementById('hospital-datetime').value = dt;
                 }
