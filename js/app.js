@@ -275,6 +275,7 @@ class DataManager {
     }
     
     // 排泄記録をスプレッドシートから取得（非同期）
+    // スプレッドシートのデータを正として使用
     async getToiletRecordsFromSheet(date, catId = APP_STATE.currentCat) {
         if (!USE_SPREADSHEET || !GAS_URL) return [];
         
@@ -284,30 +285,16 @@ class DataManager {
             const data = await response.json();
             
             if (data && !data.error && Array.isArray(data)) {
-                // ローカルストレージのデータとマージ（IDで重複排除）
+                // スプレッドシートのデータをそのまま使用（ローカルとマージしない）
                 const key = this.getKey(date, catId);
-                const localData = this.toiletData[key] || [];
                 
-                // スプレッドシートのデータを優先してマージ
-                const mergedMap = new Map();
-                
-                // まずローカルデータを追加
-                localData.forEach(r => {
-                    if (r.id) mergedMap.set(r.id, r);
-                });
-                
-                // スプレッドシートのデータで上書き/追加
-                data.forEach(r => {
-                    if (r.id) mergedMap.set(r.id, r);
-                });
-                
-                const mergedData = Array.from(mergedMap.values());
                 // 時刻順にソート
-                mergedData.sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+                data.sort((a, b) => (a.time || '').localeCompare(b.time || ''));
                 
-                this.toiletData[key] = mergedData;
+                // ローカルストレージを更新（スプレッドシートのデータで置き換え）
+                this.toiletData[key] = data;
                 Utils.saveData(STORAGE_KEYS.TOILET, this.toiletData);
-                return mergedData;
+                return data;
             }
         } catch (error) {
             console.error('スプレッドシートからの排泄データ取得エラー:', error);
