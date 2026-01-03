@@ -665,10 +665,17 @@ class UIController {
             }
         }
         
-        // 排泄タブのデータから回数を自動計算
-        const toiletRecords = this.data.getToiletRecords(date);
+        // 排泄データをスプレッドシートから取得して回数を計算
         let autoUrineCount = 0;
         let autoFecesCount = 0;
+        
+        // まずスプレッドシートから取得を試みる
+        let toiletRecords = await this.data.getToiletRecordsFromSheet(date);
+        if (toiletRecords.length === 0) {
+            // 取得できなければローカルストレージを使用
+            toiletRecords = this.data.getToiletRecords(date);
+        }
+        
         toiletRecords.forEach(r => {
             if (r.type === 'urine' || r.type === 'both') autoUrineCount++;
             if (r.type === 'feces' || r.type === 'both') autoFecesCount++;
@@ -793,16 +800,21 @@ class UIController {
     // 排泄リストを更新
     async updateToiletList() {
         const date = document.getElementById('toilet-date').value;
-        let records = this.data.getToiletRecords(date);
         
-        // ローカルストレージにデータがなければスプレッドシートから取得
+        // 常にスプレッドシートから最新データを取得
+        Utils.showLoading('排泄記録を取得中...');
+        let records = [];
+        try {
+            records = await this.data.getToiletRecordsFromSheet(date);
+        } catch (error) {
+            console.error('排泄データ取得エラー:', error);
+        } finally {
+            Utils.hideLoading();
+        }
+        
+        // スプレッドシートから取得できなければローカルを使用
         if (records.length === 0) {
-            Utils.showLoading('排泄記録を取得中...');
-            try {
-                records = await this.data.getToiletRecordsFromSheet(date);
-            } finally {
-                Utils.hideLoading();
-            }
+            records = this.data.getToiletRecords(date);
         }
         
         const list = document.getElementById('toilet-list');
