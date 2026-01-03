@@ -1041,14 +1041,15 @@ class UIController {
             }
         });
         
-        // 排尿回数グラフ
+        // 排尿回数グラフ（排泄詳細シートを優先）
         this.createOrUpdateChart('urine-chart', {
             type: 'bar',
             data: {
                 labels: labels,
                 datasets: [{
                     data: data.map(d => {
-                        const count = d.daily?.urineCount || d.toiletCount?.urine;
+                        // 排泄詳細シートのカウントを優先、なければ日次記録を使用
+                        const count = d.toiletCount?.urine > 0 ? d.toiletCount.urine : d.daily?.urineCount;
                         return count > 0 ? count : null;
                     }),
                     backgroundColor: 'rgba(86, 204, 242, 0.7)',
