@@ -906,18 +906,15 @@ class UIController {
             const response = await fetch(url);
             const record = await response.json();
             
-            console.log('診察記録取得:', record);
             if (record && !record.error) {
                 // 日時を反映（スプレッドシートのデータの時間に合わせる）
                 if (record.datetime) {
                     let dt = String(record.datetime);
-                    console.log('元の日時:', dt);
                     
                     // 日時形式を "yyyy-MM-ddTHH:mm" に変換
                     // ISO形式 "2026-01-03T01:10:00.000Z" → ローカル時間に変換
                     try {
                         const dateObj = new Date(dt);
-                        // ローカル時間で取得
                         const year = dateObj.getFullYear();
                         const month = String(dateObj.getMonth() + 1).padStart(2, '0');
                         const day = String(dateObj.getDate()).padStart(2, '0');
@@ -925,12 +922,10 @@ class UIController {
                         const min = String(dateObj.getMinutes()).padStart(2, '0');
                         dt = `${year}-${month}-${day}T${hour}:${min}`;
                     } catch (e) {
-                        console.error('日時変換エラー:', e);
                         // フォールバック: 文字列から直接切り取り
                         dt = dt.replace(' ', 'T').replace(/:\d{2}\.\d{3}Z$/, '').substring(0, 16);
                     }
                     
-                    console.log('変換後の日時:', dt);
                     document.getElementById('hospital-datetime').value = dt;
                 }
                 
