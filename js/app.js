@@ -280,11 +280,30 @@ class DataManager {
             const data = await response.json();
             
             if (data && !data.error && Array.isArray(data)) {
-                // ローカルストレージにも保存
+                // ローカルストレージのデータとマージ（IDで重複排除）
                 const key = this.getKey(date, catId);
-                this.toiletData[key] = data;
+                const localData = this.toiletData[key] || [];
+                
+                // スプレッドシートのデータを優先してマージ
+                const mergedMap = new Map();
+                
+                // まずローカルデータを追加
+                localData.forEach(r => {
+                    if (r.id) mergedMap.set(r.id, r);
+                });
+                
+                // スプレッドシートのデータで上書き/追加
+                data.forEach(r => {
+                    if (r.id) mergedMap.set(r.id, r);
+                });
+                
+                const mergedData = Array.from(mergedMap.values());
+                // 時刻順にソート
+                mergedData.sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+                
+                this.toiletData[key] = mergedData;
                 Utils.saveData(STORAGE_KEYS.TOILET, this.toiletData);
-                return data;
+                return mergedData;
             }
         } catch (error) {
             console.error('スプレッドシートからの排泄データ取得エラー:', error);
@@ -814,10 +833,11 @@ class UIController {
     async updateToiletList() {
         const date = document.getElementById('toilet-date').value;
         
-        // 常にスプレッドシートから最新データを取得
+        // スプレッドシートとローカルの両方からデータを取得してマージ
         Utils.showLoading('排泄記録を取得中...');
         let records = [];
         try {
+            // スプレッドシートから取得（内部でローカルとマージされる）
             records = await this.data.getToiletRecordsFromSheet(date);
         } catch (error) {
             console.error('排泄データ取得エラー:', error);
@@ -825,7 +845,7 @@ class UIController {
             Utils.hideLoading();
         }
         
-        // スプレッドシートから取得できなければローカルを使用
+        // スプレッドシートから取得できなければローカルのみ使用
         if (records.length === 0) {
             records = this.data.getToiletRecords(date);
         }
