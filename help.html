@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐱 にゃん健康手帳 - 使い方ガイド</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #E8927C;
+            --primary-light: #F5B8A9;
+            --secondary: #7CBAAB;
+            --bg-main: #FDF8F5;
+            --bg-card: #FFFFFF;
+            --text-primary: #4A3F3A;
+            --text-secondary: #8B7D75;
+            --shadow-sm: 0 2px 8px rgba(74, 63, 58, 0.08);
+            --shadow-md: 0 4px 16px rgba(74, 63, 58, 0.12);
+            --radius-md: 12px;
+            --radius-lg: 20px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'M PLUS Rounded 1c', 'Noto Sans JP', sans-serif;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            line-height: 1.8;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, #D4735D 100%);
+            padding: 30px;
+            border-radius: var(--radius-lg);
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-md);
+        }
+        
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            opacity: 0.9;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        section {
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        h2 {
+            color: var(--primary);
+            font-size: 1.3rem;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-light);
+        }
+        
+        h3 {
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            margin: 20px 0 12px;
+        }
+        
+        p {
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+        
+        th, td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background: var(--bg-main);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        tr:hover {
+            background: var(--bg-main);
+        }
+        
+        .tip {
+            background: #FFF3D4;
+            border-left: 4px solid #F2C94C;
+            padding: 12px 16px;
+            margin: 16px 0;
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+        }
+        
+        .tip-title {
+            font-weight: 600;
+            color: #B8860B;
+            margin-bottom: 4px;
+        }
+        
+        code {
+            background: var(--bg-main);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        
+        a {
+            color: var(--primary);
+        }
+        
+        .sheet-link {
+            display: inline-block;
+            background: var(--secondary);
+            color: white;
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            font-weight: 500;
+            margin: 10px 0;
+        }
+        
+        .sheet-link:hover {
+            opacity: 0.9;
+        }
+        
+        ul {
+            margin: 12px 0;
+            padding-left: 24px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+        
+        .keyboard {
+            display: inline-block;
+            background: #333;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← アプリに戻る</a>
+        
+        <header>
+            <h1>🐱 にゃん健康手帳</h1>
+            <p>使い方ガイド</p>
+        </header>
+        
+        <section>
+            <h2>📱 基本的な使い方</h2>
+            
+            <h3>各タブの役割</h3>
+            <table>
+                <tr>
+                    <th>タブ</th>
+                    <th>内容</th>
+                </tr>
+                <tr>
+                    <td>📋 日次記録</td>
+                    <td>体重、食事量、飲水量など毎日の基本情報</td>
+                </tr>
+                <tr>
+                    <td>🚽 排泄</td>
+                    <td>おしっこ・うんちの記録（クイック登録も可能）</td>
+                </tr>
+                <tr>
+                    <td>💊 投薬</td>
+                    <td>薬・サプリメントの服用記録</td>
+                </tr>
+                <tr>
+                    <td>🏥 診察</td>
+                    <td>通院記録、点滴、診断内容</td>
+                </tr>
+                <tr>
+                    <td>🔬 検査</td>
+                    <td>血液検査・尿検査の数値</td>
+                </tr>
+                <tr>
+                    <td>📊 グラフ</td>
+                    <td>各データの推移をグラフで確認</td>
+                </tr>
+            </table>
+        </section>
+        
+        <section>
+            <h2>✏️ 過去のデータを修正する方法</h2>
+            
+            <h3>方法1: アプリから修正</h3>
+            <table>
+                <tr>
+                    <th>タブ</th>
+                    <th>修正方法</th>
+                </tr>
+                <tr>
+                    <td>日次記録</td>
+                    <td>日付を変更 → データ読み込み → 編集 → 保存</td>
+                </tr>
+                <tr>
+                    <td>投薬記録</td>
+                    <td>日付・タイミングを選択 → 編集 → 保存（上書き）</td>
+                </tr>
+                <tr>
+                    <td>診察記録</td>
+                    <td>日付を変更 → データ読み込み → 編集 → 保存</td>
+                </tr>
+                <tr>
+                    <td>検査結果</td>
+                    <td>日付を変更 → データ読み込み → 編集 → 保存</td>
+                </tr>
+                <tr>
+                    <td>排泄記録</td>
+                    <td>削除のみ可能（編集は方法2で）</td>
+                </tr>
+            </table>
+            
+            <h3>方法2: スプレッドシートを直接編集（おすすめ）</h3>
+            <p>一番確実な方法です。スプレッドシートを開いて該当のセルを直接編集できます。</p>
+            
+            <a href="https://docs.google.com/spreadsheets/d/16NoJl_VQVV5tFN8c042Ayno6GfSjbNipHkOFwV2Gxqg/edit" target="_blank" class="sheet-link">
+                📊 スプレッドシートを開く
+            </a>
+            
+            <div class="tip">
+                <div class="tip-title">💡 ヒント</div>
+                編集後、アプリで <span class="keyboard">Ctrl + Shift + R</span> を押すと最新データが反映されます。
+            </div>
+        </section>
+        
+        <section>
+            <h2>📊 スプレッドシートの構造</h2>
+            
+            <h3>日次記録シート</h3>
+            <table>
+                <tr><th>列</th><th>内容</th></tr>
+                <tr><td>A</td><td>日付</td></tr>
+                <tr><td>B</td><td>猫（ラッキー/ミー）</td></tr>
+                <tr><td>C</td><td>体重(kg)</td></tr>
+                <tr><td>D</td><td>元気度</td></tr>
+                <tr><td>E</td><td>食欲</td></tr>
+                <tr><td>F</td><td>飲水量(cc)</td></tr>
+                <tr><td>G</td><td>カリカリ(g)</td></tr>
+                <tr><td>H</td><td>ウェット(g)</td></tr>
+                <tr><td>I</td><td>チュール(本)</td></tr>
+                <tr><td>J</td><td>おやつ(袋)</td></tr>
+                <tr><td>K</td><td>尿回数</td></tr>
+                <tr><td>L</td><td>便回数</td></tr>
+                <tr><td>M</td><td>便の状態</td></tr>
+                <tr><td>N</td><td>点滴(cc)</td></tr>
+                <tr><td>O</td><td>メモ</td></tr>
+            </table>
+            
+            <h3>排泄詳細シート</h3>
+            <table>
+                <tr><th>列</th><th>内容</th></tr>
+                <tr><td>A</td><td>日付</td></tr>
+                <tr><td>B</td><td>時刻</td></tr>
+                <tr><td>C</td><td>猫</td></tr>
+                <tr><td>D</td><td>種類（尿/便/両方）</td></tr>
+                <tr><td>E</td><td>量</td></tr>
+                <tr><td>F</td><td>メモ</td></tr>
+                <tr><td>G</td><td>記録ID（編集不要）</td></tr>
+            </table>
+            
+            <h3>診察記録シート</h3>
+            <table>
+                <tr><th>列</th><th>内容</th></tr>
+                <tr><td>A</td><td>日時</td></tr>
+                <tr><td>B</td><td>猫</td></tr>
+                <tr><td>C</td><td>体重(kg)</td></tr>
+                <tr><td>D</td><td>点滴（TRUE/FALSE）</td></tr>
+                <tr><td>E</td><td>点滴量(cc)</td></tr>
+                <tr><td>F</td><td>エコー検査（TRUE/FALSE）</td></tr>
+                <tr><td>G</td><td>血液検査（TRUE/FALSE）</td></tr>
+                <tr><td>H</td><td>尿検査（TRUE/FALSE）</td></tr>
+                <tr><td>I</td><td>所見・診断</td></tr>
+                <tr><td>J</td><td>処方薬</td></tr>
+            </table>
+            
+            <h3>投薬記録シート</h3>
+            <table>
+                <tr><th>列</th><th>内容</th></tr>
+                <tr><td>A</td><td>日付</td></tr>
+                <tr><td>B</td><td>猫</td></tr>
+                <tr><td>C</td><td>タイミング（朝/昼/夜）</td></tr>
+                <tr><td>D〜L</td><td>各薬（TRUE/FALSE）</td></tr>
+                <tr><td>M</td><td>その他・メモ</td></tr>
+            </table>
+        </section>
+        
+        <section>
+            <h2>🔄 データの仕組み</h2>
+            
+            <h3>データの流れ</h3>
+            <ul>
+                <li>アプリで入力 → スプレッドシートに保存</li>
+                <li>グラフ表示 → スプレッドシートから取得</li>
+                <li>キャッシュ: 5分間保持（高速表示のため）</li>
+            </ul>
+            
+            <h3>データの正（マスター）</h3>
+            <table>
+                <tr><th>データ</th><th>正となるシート</th></tr>
+                <tr><td>点滴データ</td><td>診察記録シート</td></tr>
+                <tr><td>排泄回数</td><td>排泄詳細シート</td></tr>
+                <tr><td>投薬タイムライン</td><td>投薬記録シート</td></tr>
+                <tr><td>その他</td><td>日次記録シート</td></tr>
+            </table>
+        </section>
+        
+        <section>
+            <h2>⌨️ ショートカット</h2>
+            <table>
+                <tr><th>キー</th><th>動作</th></tr>
+                <tr>
+                    <td><span class="keyboard">Ctrl + Shift + R</span></td>
+                    <td>強制リフレッシュ（キャッシュクリア）</td>
+                </tr>
+                <tr>
+                    <td><span class="keyboard">F12</span></td>
+                    <td>開発者ツール（デバッグ用）</td>
+                </tr>
+            </table>
+        </section>
+        
+        <section>
+            <h2>❓ トラブルシューティング</h2>
+            
+            <h3>データが表示されない</h3>
+            <ul>
+                <li><span class="keyboard">Ctrl + Shift + R</span> でリフレッシュ</li>
+                <li>スプレッドシートにデータがあるか確認</li>
+                <li>日付の形式が正しいか確認（YYYY-MM-DD または YYYY/MM/DD）</li>
+            </ul>
+            
+            <h3>グラフが更新されない</h3>
+            <ul>
+                <li>キャッシュが5分間保持されるため、少し待つか強制リフレッシュ</li>
+            </ul>
+        </section>
+        
+        <footer style="text-align: center; padding: 30px; color: var(--text-secondary);">
+            <p>🐱 にゃん健康手帳 - ラッキーちゃんの健康管理を応援！</p>
+        </footer>
+    </div>
+</body>
+</html>
+
