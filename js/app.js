@@ -270,6 +270,28 @@ class DataManager {
         return this.toiletData[key] || [];
     }
     
+    // 排泄記録をスプレッドシートから取得（非同期）
+    async getToiletRecordsFromSheet(date, catId = APP_STATE.currentCat) {
+        if (!USE_SPREADSHEET || !GAS_URL) return [];
+        
+        try {
+            const url = `${GAS_URL}?action=getToiletRecords&cat=${catId}&date=${date}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            if (data && !data.error && Array.isArray(data)) {
+                // ローカルストレージにも保存
+                const key = this.getKey(date, catId);
+                this.toiletData[key] = data;
+                Utils.saveData(STORAGE_KEYS.TOILET, this.toiletData);
+                return data;
+            }
+        } catch (error) {
+            console.error('スプレッドシートからの排泄データ取得エラー:', error);
+        }
+        return [];
+    }
+    
     // 排泄記録を削除
     deleteToiletRecord(date, recordId) {
         const key = this.getKey(date);
@@ -769,9 +791,20 @@ class UIController {
     }
     
     // 排泄リストを更新
-    updateToiletList() {
+    async updateToiletList() {
         const date = document.getElementById('toilet-date').value;
-        const records = this.data.getToiletRecords(date);
+        let records = this.data.getToiletRecords(date);
+        
+        // ローカルストレージにデータがなければスプレッドシートから取得
+        if (records.length === 0) {
+            Utils.showLoading('排泄記録を取得中...');
+            try {
+                records = await this.data.getToiletRecordsFromSheet(date);
+            } finally {
+                Utils.hideLoading();
+            }
+        }
+        
         const list = document.getElementById('toilet-list');
         
         if (records.length === 0) {
