@@ -572,6 +572,11 @@ class UIController {
                 e.target.checked ? 'flex' : 'none';
         });
         
+        // 診察日時変更時にデータを読み込み
+        document.getElementById('hospital-datetime').addEventListener('change', () => {
+            this.loadHospitalData();
+        });
+        
         // 検査結果フォーム
         document.getElementById('labtest-form').addEventListener('submit', (e) => {
             e.preventDefault();
@@ -885,6 +890,44 @@ class UIController {
         
         this.data.saveMedicineRecord(date, timing, record);
         Utils.showToast('投薬記録を保存しました！');
+    }
+    
+    // 診察データを読み込み
+    async loadHospitalData() {
+        const datetime = document.getElementById('hospital-datetime').value;
+        const date = datetime.split('T')[0];
+        
+        Utils.showLoading('診察記録を取得中...');
+        
+        try {
+            const url = `${GAS_URL}?action=getHospitalRecord&cat=${APP_STATE.currentCat}&date=${date}`;
+            const response = await fetch(url);
+            const record = await response.json();
+            
+            if (record && !record.error) {
+                // フォームにデータを反映
+                document.getElementById('hospital-weight').value = record.weight || '';
+                document.getElementById('drip-amount').value = record.dripAmount || '';
+                document.getElementById('diagnosis').value = record.diagnosis || '';
+                document.getElementById('prescription').value = record.prescription || '';
+                
+                // チェックボックス
+                document.querySelector('input[value="drip"]').checked = record.hasDrip || false;
+                document.querySelector('input[value="echo"]').checked = record.hasEcho || false;
+                document.querySelector('input[value="blood"]').checked = record.hasBlood || false;
+                document.querySelector('input[value="urine"]').checked = record.hasUrine || false;
+                
+                // 点滴量入力欄の表示
+                document.getElementById('drip-amount-row').style.display = 
+                    record.hasDrip ? 'flex' : 'none';
+                
+                Utils.showToast('診察記録を読み込みました', '📋');
+            }
+        } catch (error) {
+            console.error('診察記録取得エラー:', error);
+        } finally {
+            Utils.hideLoading();
+        }
     }
     
     // 診察フォームを保存

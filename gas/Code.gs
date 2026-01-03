@@ -56,6 +56,9 @@ function doGet(e) {
       case 'getAllData':
         result = getAllData(cat, e.parameter.startDate, e.parameter.endDate);
         break;
+      case 'getHospitalRecord':
+        result = getHospitalRecord(cat, date);
+        break;
       default:
         result = { error: 'Unknown action' };
     }
@@ -447,6 +450,50 @@ function saveHospitalRecord(data) {
   sheet.appendRow(row);
   
   return { success: true, id: recordId };
+}
+
+/**
+ * 診察記録を取得（日付で検索）
+ */
+function getHospitalRecord(cat, date) {
+  const sheet = getSheet(SHEETS.HOSPITAL);
+  const catName = cat === 'lucky' ? 'ラッキー' : 'ミー';
+  const data = sheet.getDataRange().getValues();
+  
+  for (let i = data.length - 1; i >= 1; i--) {
+    let rowDatetime = data[i][0];
+    let rowDate = '';
+    
+    if (rowDatetime instanceof Date) {
+      rowDate = Utilities.formatDate(rowDatetime, 'Asia/Tokyo', 'yyyy-MM-dd');
+    } else if (typeof rowDatetime === 'string') {
+      rowDate = rowDatetime.split('T')[0];
+      if (rowDate.includes('/')) {
+        const parts = rowDate.split('/');
+        if (parts.length === 3) {
+          rowDate = `${parts[0]}-${String(parts[1]).padStart(2, '0')}-${String(parts[2]).padStart(2, '0')}`;
+        }
+      }
+    }
+    
+    if (rowDate === date && data[i][1] === catName) {
+      return {
+        datetime: rowDatetime,
+        cat: cat,
+        weight: data[i][2] || '',
+        hasDrip: data[i][3] || false,
+        dripAmount: data[i][4] || '',
+        hasEcho: data[i][5] || false,
+        hasBlood: data[i][6] || false,
+        hasUrine: data[i][7] || false,
+        diagnosis: data[i][8] || '',
+        prescription: data[i][9] || '',
+        id: data[i][10]
+      };
+    }
+  }
+  
+  return null;
 }
 
 // ========================================
