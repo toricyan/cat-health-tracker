@@ -467,7 +467,8 @@ function getHospitalRecord(cat, date) {
     if (rowDatetime instanceof Date) {
       rowDate = Utilities.formatDate(rowDatetime, 'Asia/Tokyo', 'yyyy-MM-dd');
     } else if (typeof rowDatetime === 'string') {
-      rowDate = rowDatetime.split('T')[0];
+      // スペース区切り、T区切り両方に対応
+      rowDate = rowDatetime.split(' ')[0].split('T')[0];
       if (rowDate.includes('/')) {
         const parts = rowDate.split('/');
         if (parts.length === 3) {

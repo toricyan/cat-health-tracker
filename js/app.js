@@ -632,6 +632,8 @@ class UIController {
             this.loadDailyData();
         } else if (tabId === 'toilet') {
             this.updateToiletList();
+        } else if (tabId === 'hospital') {
+            this.loadHospitalData();
         } else if (tabId === 'labtest') {
             this.loadLabtestData();
         } else if (tabId === 'chart') {
