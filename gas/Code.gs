@@ -646,12 +646,14 @@ function getAllData(cat, startDate, endDate) {
   const toiletSheet = getSheet(SHEETS.TOILET);
   const labtestSheet = getSheet(SHEETS.LABTEST);
   const medicineSheet = getSheet(SHEETS.MEDICINE);
+  const hospitalSheet = getSheet(SHEETS.HOSPITAL);
   const catName = cat === 'lucky' ? 'ラッキー' : 'ミー';
   
   const dailyData = dailySheet.getDataRange().getValues();
   const toiletData = toiletSheet.getDataRange().getValues();
   const labtestData = labtestSheet.getDataRange().getValues();
   const medicineData = medicineSheet.getDataRange().getValues();
+  const hospitalData = hospitalSheet.getDataRange().getValues();
   
   const result = [];
   
@@ -814,12 +816,53 @@ function getAllData(cat, startDate, endDate) {
       }
     }
     
+    // 診察記録から点滴データを検索（診察記録シートを正とする）
+    let hospitalDrip = 0;
+    for (let i = 1; i < hospitalData.length; i++) {
+      let rowDatetime = hospitalData[i][0];
+      let rowDate = '';
+      
+      if (rowDatetime instanceof Date) {
+        rowDate = Utilities.formatDate(rowDatetime, 'Asia/Tokyo', 'yyyy-MM-dd');
+      } else if (typeof rowDatetime === 'string') {
+        // "2026-01-03 10:1" や "2026/01/03" 形式に対応
+        rowDate = rowDatetime.split(' ')[0].split('T')[0];
+        if (rowDate.includes('/')) {
+          const parts = rowDate.split('/');
+          if (parts.length === 3) {
+            rowDate = `${parts[0]}-${String(parts[1]).padStart(2, '0')}-${String(parts[2]).padStart(2, '0')}`;
+          }
+        }
+      }
+      
+      if (rowDate === dateStr && hospitalData[i][1] === catName) {
+        // 点滴があれば点滴量を取得
+        if (hospitalData[i][3]) { // 点滴フラグ
+          const amount = hospitalData[i][4];
+          if (amount && Number(amount) > 0) {
+            hospitalDrip = Number(amount);
+          }
+        }
+      }
+    }
+    
+    // 点滴データ: 診察記録を優先、なければ日次記録を使用
+    const finalDrip = hospitalDrip > 0 ? hospitalDrip : (daily?.drip || 0);
+    
+    // dailyのdripをfinalDripで上書き
+    if (daily) {
+      daily.drip = finalDrip;
+    } else if (finalDrip > 0) {
+      daily = { drip: finalDrip };
+    }
+    
     result.push({
       date: dateStr,
       daily: daily,
       toiletCount: { urine: urineCount, feces: fecesCount },
       labtest: labtest,
-      medicine: medicine
+      medicine: medicine,
+      hospital: { drip: finalDrip }
     });
   }
   
