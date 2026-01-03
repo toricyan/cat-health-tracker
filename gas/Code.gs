@@ -324,14 +324,36 @@ function getToiletRecords(cat, date) {
   
   for (let i = 1; i < data.length; i++) {
     let rowDate = data[i][0];
+    
+    // 日付形式を統一（yyyy-MM-dd）
     if (rowDate instanceof Date) {
       rowDate = Utilities.formatDate(rowDate, 'Asia/Tokyo', 'yyyy-MM-dd');
+    } else if (typeof rowDate === 'string') {
+      // "2026/01/04" や "2026-01-04" 形式に対応
+      if (rowDate.includes('/')) {
+        const parts = rowDate.split('/');
+        if (parts.length === 3) {
+          rowDate = `${parts[0]}-${String(parts[1]).padStart(2, '0')}-${String(parts[2]).padStart(2, '0')}`;
+        }
+      }
+    }
+    
+    // 時刻形式を統一（HH:mm）
+    let rowTime = data[i][1];
+    if (rowTime instanceof Date) {
+      rowTime = Utilities.formatDate(rowTime, 'Asia/Tokyo', 'HH:mm');
+    } else if (typeof rowTime === 'string') {
+      // "1:00" → "01:00" にパディング
+      const timeParts = rowTime.split(':');
+      if (timeParts.length === 2) {
+        rowTime = `${String(timeParts[0]).padStart(2, '0')}:${String(timeParts[1]).padStart(2, '0')}`;
+      }
     }
     
     if (rowDate === date && data[i][2] === catName) {
       records.push({
         date: rowDate,
-        time: data[i][1],
+        time: rowTime,
         cat: cat,
         type: reverseToiletType(data[i][3]),
         amount: reverseAmount(data[i][4]),
@@ -342,7 +364,7 @@ function getToiletRecords(cat, date) {
   }
   
   // 時刻でソート
-  records.sort((a, b) => a.time.localeCompare(b.time));
+  records.sort((a, b) => (a.time || '').localeCompare(b.time || ''));
   
   return records;
 }
