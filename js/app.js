@@ -906,10 +906,12 @@ class UIController {
             const response = await fetch(url);
             const record = await response.json();
             
+            console.log('診察記録取得:', record);
             if (record && !record.error) {
                 // 日時を反映（スプレッドシートのデータの時間に合わせる）
                 if (record.datetime) {
                     let dt = record.datetime;
+                    console.log('元の日時:', dt);
                     // 日時形式を変換（"2026-01-03 10:10" → "2026-01-03T10:10"）
                     if (typeof dt === 'string') {
                         dt = dt.replace(' ', 'T');
@@ -921,6 +923,7 @@ class UIController {
                             dt = dt.replace(/T\d+:\d+/, `T${hour}:${min}`);
                         }
                     }
+                    console.log('変換後の日時:', dt);
                     document.getElementById('hospital-datetime').value = dt;
                 }
                 
