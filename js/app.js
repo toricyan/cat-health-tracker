@@ -302,6 +302,12 @@ class DataManager {
             // 日次記録の排泄回数も自動更新
             this.updateDailyToiletCount(date);
         }
+        
+        // スプレッドシートからも削除
+        this.postToSpreadsheet({
+            action: 'deleteToiletRecord',
+            id: recordId
+        });
     }
     
     // 投薬記録を保存
