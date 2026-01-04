@@ -856,6 +856,7 @@ class UIController {
         list.innerHTML = records.map(record => {
             const typeIcon = record.type === 'urine' ? '💧' : 
                             record.type === 'feces' ? '💩' : '💧💩';
+            // 量の表示（普通は表示しない）
             const amountLabel = {
                 'normal': '',
                 '': '',
@@ -866,7 +867,7 @@ class UIController {
                 '多め': '(多め)',
                 '少量': '(少量)',
                 '数滴': '(数滴)'
-            }[record.amount] || (record.amount ? `(${record.amount})` : '');
+            }[record.amount] ?? '';
             
             return `
                 <div class="record-item" data-id="${record.id}">
