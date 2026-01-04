@@ -858,10 +858,15 @@ class UIController {
                             record.type === 'feces' ? '💩' : '💧💩';
             const amountLabel = {
                 'normal': '',
+                '': '',
                 'more': '(多め)',
                 'less': '(少量)',
-                'drops': '(数滴)'
-            }[record.amount] || '';
+                'drops': '(数滴)',
+                '普通': '',
+                '多め': '(多め)',
+                '少量': '(少量)',
+                '数滴': '(数滴)'
+            }[record.amount] || (record.amount ? `(${record.amount})` : '');
             
             return `
                 <div class="record-item" data-id="${record.id}">
