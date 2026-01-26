@@ -28,7 +28,8 @@ const SHEETS = {
   TOILET: '排泄詳細',
   MEDICINE: '投薬記録',
   HOSPITAL: '診察記録',
-  LABTEST: '検査結果'
+  LABTEST: '検査結果',
+  MEDICINE_MASTER: '薬マスター'
 };
 
 // ========================================
@@ -58,6 +59,9 @@ function doGet(e) {
         break;
       case 'getHospitalRecord':
         result = getHospitalRecord(cat, date);
+        break;
+      case 'getMedicineList':
+        result = getMedicineList();
         break;
       default:
         result = { error: 'Unknown action' };
@@ -951,7 +955,68 @@ function testSetup() {
   getSheet(SHEETS.MEDICINE);
   getSheet(SHEETS.HOSPITAL);
   getSheet(SHEETS.LABTEST);
+  getSheet(SHEETS.MEDICINE_MASTER);
   
   Logger.log('✅ シートの初期化が完了しました！');
+}
+
+// ========================================
+// 薬マスター
+// ========================================
+
+/**
+ * 薬マスターを取得
+ * 薬マスターシートの構成:
+ * A列: key（英語キー）
+ * B列: 名前（日本語表示名）
+ * C列: 種類（処方薬/サプリ）
+ * D列: 色（HEXカラー）
+ */
+function getMedicineList() {
+  const sheet = getSheet(SHEETS.MEDICINE_MASTER);
+  const data = sheet.getDataRange().getValues();
+  
+  const prescriptions = [];
+  const supplements = [];
+  
+  // ヘッダー行をスキップ (i=1から開始)
+  for (let i = 1; i < data.length; i++) {
+    const row = data[i];
+    if (!row[0]) continue; // keyが空ならスキップ
+    
+    const medicine = {
+      key: row[0],
+      name: row[1] || row[0],
+      color: row[3] || '#888888'
+    };
+    
+    const type = row[2] || '処方薬';
+    if (type === 'サプリ' || type === 'サプリメント') {
+      supplements.push(medicine);
+    } else {
+      prescriptions.push(medicine);
+    }
+  }
+  
+  // デフォルトの薬リストを返す（シートが空の場合）
+  if (prescriptions.length === 0 && supplements.length === 0) {
+    return {
+      prescriptions: [
+        { key: 'rapros', name: 'ラプロス', color: '#E8927C' },
+        { key: 'lactulose', name: 'ラクツロース', color: '#7CBAAB' },
+        { key: 'clavaseptin', name: 'クラバセプチン', color: '#56CCF2' },
+        { key: 'vibramycin', name: 'ビブラマイシン', color: '#F2C94C' },
+        { key: 'veraflox', name: 'ベラフロックス', color: '#27AE60' },
+        { key: 'appetite', name: 'ミルタザビン（食欲増進薬）', color: '#EB5757' }
+      ],
+      supplements: [
+        { key: 'cranberry', name: 'クランベリBB', color: '#BB6BD9' },
+        { key: 'azodyl', name: 'アゾディル', color: '#F2994A' },
+        { key: 'renalzin', name: 'レンジアレン', color: '#6FCF97' }
+      ]
+    };
+  }
+  
+  return { prescriptions, supplements };
 }
 

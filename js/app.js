@@ -11,7 +11,8 @@ const APP_STATE = {
     cats: {
         lucky: { name: 'ラッキー', icon: '🐈' },
         mi: { name: 'ミー', icon: '🐈‍⬛' }
-    }
+    },
+    medicineList: null // 薬マスター（スプレッドシートから取得）
 };
 
 // Google Apps Script WebアプリのURL
@@ -512,11 +513,58 @@ class UIController {
     }
     
     // 初期化
-    init() {
+    async init() {
         this.setupEventListeners();
         this.setDefaultDates();
         this.loadCurrentData();
         this.updateToiletList();
+        
+        // 薬マスターを取得して投薬フォームを動的生成
+        await this.loadMedicineList();
+    }
+    
+    // 薬マスターを取得
+    async loadMedicineList() {
+        if (!USE_SPREADSHEET) return;
+        
+        try {
+            const response = await fetch(`${GAS_URL}?action=getMedicineList`);
+            const data = await response.json();
+            APP_STATE.medicineList = data;
+            this.renderMedicineForm();
+        } catch (error) {
+            console.error('薬マスター取得エラー:', error);
+        }
+    }
+    
+    // 投薬フォームを動的生成
+    renderMedicineForm() {
+        const medicineList = APP_STATE.medicineList;
+        if (!medicineList) return;
+        
+        // 処方薬セクション
+        const prescriptionContainer = document.getElementById('prescription-medicines');
+        if (prescriptionContainer && medicineList.prescriptions) {
+            prescriptionContainer.innerHTML = medicineList.prescriptions.map(med => `
+                <label class="checkbox-item">
+                    <input type="checkbox" name="medicine" value="${med.key}">
+                    <span class="checkbox-custom"></span>
+                    <span class="checkbox-label">${med.name}</span>
+                </label>
+            `).join('');
+        }
+        
+        // サプリメントセクション
+        const supplementContainer = document.getElementById('supplement-medicines');
+        if (supplementContainer && medicineList.supplements) {
+            supplementContainer.innerHTML = medicineList.supplements.map(med => `
+                <label class="checkbox-item">
+                    <input type="checkbox" name="medicine" value="${med.key}">
+                    <span class="checkbox-custom"></span>
+                    <span class="checkbox-label">${med.name}</span>
+                </label>
+            `).join('');
+        }
     }
     
     // イベントリスナーを設定
@@ -1625,23 +1673,25 @@ class UIController {
         const container = document.getElementById('medicine-timeline');
         if (!container) return;
         
-        // 処方薬リスト
-        const prescriptionMeds = [
-            { key: 'rapros', name: 'ラプロス', color: '#E8927C' },
-            { key: 'lactulose', name: 'ラクツロース', color: '#7CBAAB' },
-            { key: 'clavaseptin', name: 'クラバセプチン', color: '#56CCF2' },
-            { key: 'vibramycin', name: 'ビブラマイシン', color: '#F2C94C' },
-            { key: 'veraflox', name: 'ベラフロックス', color: '#27AE60' },
-            { key: 'appetite', name: 'ミルタザビン（食欲増進薬）', color: '#EB5757' }
-        ];
+        // 薬マスターから取得（なければデフォルト）
+        const medicineList = APP_STATE.medicineList || {
+            prescriptions: [
+                { key: 'rapros', name: 'ラプロス', color: '#E8927C' },
+                { key: 'lactulose', name: 'ラクツロース', color: '#7CBAAB' },
+                { key: 'clavaseptin', name: 'クラバセプチン', color: '#56CCF2' },
+                { key: 'vibramycin', name: 'ビブラマイシン', color: '#F2C94C' },
+                { key: 'veraflox', name: 'ベラフロックス', color: '#27AE60' },
+                { key: 'appetite', name: 'ミルタザビン（食欲増進薬）', color: '#EB5757' }
+            ],
+            supplements: [
+                { key: 'cranberry', name: 'クランベリBB', color: '#BB6BD9' },
+                { key: 'uroact', name: 'ウロアクト', color: '#F2994A' },
+                { key: 'utclean', name: 'UT Clean', color: '#2D9CDB' }
+            ]
+        };
         
-        // サプリメントリスト
-        const supplements = [
-            { key: 'cranberry', name: 'クランベリBB', color: '#BB6BD9' },
-            { key: 'uroact', name: 'ウロアクト', color: '#F2994A' },
-            { key: 'utclean', name: 'UT Clean', color: '#2D9CDB' }
-        ];
-        
+        const prescriptionMeds = medicineList.prescriptions;
+        const supplements = medicineList.supplements;
         const medicines = [...prescriptionMeds, ...supplements];
         
         // HTML生成
