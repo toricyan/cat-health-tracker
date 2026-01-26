@@ -163,9 +163,7 @@ function initializeSheet(sheet, sheetName) {
       '日付', '時刻', '猫', '種類', '量', 'メモ', '記録ID', '作成日時'
     ],
     [SHEETS.MEDICINE]: [
-      '日付', '猫', 'タイミング', 'ラプロス', 'ラクツロース', 'クランベリBB',
-      'クラバセプチン', 'ビブラマイシン', 'ウロアクト', 'UT Clean',
-      'ベラフロックス', 'ミルタザビン（食欲増進薬）', 'その他', '更新日時'
+      '日付', '猫', 'タイミング', '投薬リスト', 'メモ', '更新日時'
     ],
     [SHEETS.HOSPITAL]: [
       '日時', '猫', '体重(kg)', '点滴', '点滴量(cc)', 'エコー検査',
@@ -396,6 +394,10 @@ function deleteToiletRecord(data) {
 
 /**
  * 投薬記録を保存
+ * 新形式: 薬名をカンマ区切りで保存（薬マスター対応）
+ * 
+ * 投薬記録シート構成:
+ * A: 日付, B: 猫, C: タイミング, D: 投薬リスト（カンマ区切り）, E: メモ, F: 更新日時
  */
 function saveMedicineRecord(data) {
   const sheet = getSheet(SHEETS.MEDICINE);
@@ -419,19 +421,14 @@ function saveMedicineRecord(data) {
   }
   
   const medicines = data.medicines || [];
+  // 薬名をカンマ区切りで保存
+  const medicineList = medicines.join(',');
+  
   const row = [
     data.date,
     cat,
     timing,
-    medicines.includes('rapros'),
-    medicines.includes('lactulose'),
-    medicines.includes('cranberry'),
-    medicines.includes('clavaseptin'),
-    medicines.includes('vibramycin'),
-    medicines.includes('uroact'),
-    medicines.includes('utclean'),
-    medicines.includes('veraflox'),
-    medicines.includes('appetite'),
+    medicineList,  // カンマ区切りの薬リスト
     data.memo || '',
     new Date()
   ];
@@ -806,18 +803,8 @@ function getAllData(cat, startDate, endDate) {
       }
     }
     
-    // 投薬データを検索
-    let medicine = {
-      rapros: false,
-      lactulose: false,
-      cranberry: false,
-      clavaseptin: false,
-      vibramycin: false,
-      uroact: false,
-      utclean: false,
-      veraflox: false,
-      appetite: false
-    };
+    // 投薬データを検索（新形式: カンマ区切り / 旧形式: 列ごとTRUE/FALSE に対応）
+    let medicine = {};
     for (let i = 1; i < medicineData.length; i++) {
       let rowDate = medicineData[i][0];
       if (rowDate instanceof Date) {
@@ -830,16 +817,27 @@ function getAllData(cat, startDate, endDate) {
       }
       
       if (rowDate === dateStr && medicineData[i][1] === catName) {
-        // 各薬のチェック（TRUE/○があれば投薬あり）
-        if (medicineData[i][3]) medicine.rapros = true;       // ラプロス
-        if (medicineData[i][4]) medicine.lactulose = true;    // ラクツロース
-        if (medicineData[i][5]) medicine.cranberry = true;    // クランベリBB
-        if (medicineData[i][6]) medicine.clavaseptin = true;  // クラバセプチン
-        if (medicineData[i][7]) medicine.vibramycin = true;   // ビブラマイシン
-        if (medicineData[i][8]) medicine.uroact = true;       // ウロアクト
-        if (medicineData[i][9]) medicine.utclean = true;      // UT Clean
-        if (medicineData[i][10]) medicine.veraflox = true;    // ベラフロックス
-        if (medicineData[i][11]) medicine.appetite = true;    // ミルタザビン
+        const col3 = medicineData[i][3];
+        
+        // 新形式判定: D列がカンマ区切りの文字列の場合
+        if (typeof col3 === 'string' && (col3.includes(',') || col3.match(/^[a-z]+$/))) {
+          // 新形式: カンマ区切りの薬リスト
+          const meds = col3.split(',').filter(m => m.trim());
+          meds.forEach(m => {
+            medicine[m.trim()] = true;
+          });
+        } else {
+          // 旧形式: 列ごとにTRUE/FALSEまたは○
+          if (medicineData[i][3]) medicine.rapros = true;       // ラプロス
+          if (medicineData[i][4]) medicine.lactulose = true;    // ラクツロース
+          if (medicineData[i][5]) medicine.cranberry = true;    // クランベリBB
+          if (medicineData[i][6]) medicine.clavaseptin = true;  // クラバセプチン
+          if (medicineData[i][7]) medicine.vibramycin = true;   // ビブラマイシン
+          if (medicineData[i][8]) medicine.uroact = true;       // ウロアクト
+          if (medicineData[i][9]) medicine.utclean = true;      // UT Clean
+          if (medicineData[i][10]) medicine.veraflox = true;    // ベラフロックス
+          if (medicineData[i][11]) medicine.appetite = true;    // ミルタザビン
+        }
       }
     }
     
