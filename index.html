@@ -748,6 +748,63 @@
                         </div>
                     </div>
 
+                    <!-- 🏥 獣医師向け診療サマリー（印刷用） -->
+                    <div class="vet-summary" id="vet-summary">
+                        <div class="vet-summary-header">
+                            <h3>🏥 診療サマリー（印刷用）</h3>
+                            <button type="button" class="print-btn" id="print-summary-btn">🖨️ A5印刷</button>
+                        </div>
+                        
+                        <!-- 食事量グラフ（積み上げ棒＋総量折れ線） -->
+                        <div class="vet-chart-section">
+                            <div class="vet-chart-title">食事摂取量の推移</div>
+                            <div class="vet-chart-wrapper">
+                                <canvas id="vet-food-chart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <!-- 投薬・点滴タイムライン -->
+                        <div class="vet-timeline-section">
+                            <div class="vet-chart-title">投薬・点滴タイムライン</div>
+                            <div class="vet-timeline" id="vet-timeline">
+                                <!-- 動的に生成 -->
+                            </div>
+                        </div>
+                        
+                        <!-- サブ情報：体重 + 排尿 -->
+                        <div class="vet-sub-section">
+                            <div class="vet-chart-title">体重・排尿</div>
+                            <div class="vet-chart-wrapper" style="height: 120px;">
+                                <canvas id="vet-weight-chart"></canvas>
+                            </div>
+                            <div class="vet-urine-row" id="vet-urine-row">
+                                <!-- 動的に生成 -->
+                            </div>
+                        </div>
+                        
+                        <!-- 凡例 -->
+                        <div class="vet-legend">
+                            <div class="vet-legend-title">凡例</div>
+                            <div class="vet-legend-items">
+                                <div class="vet-legend-group">
+                                    <span class="vet-legend-label">食事:</span>
+                                    <span class="vet-legend-item"><span class="pattern-light"></span>カリカリ</span>
+                                    <span class="vet-legend-item"><span class="pattern-medium"></span>ウェット</span>
+                                    <span class="vet-legend-item"><span class="pattern-stripe"></span>チュール</span>
+                                    <span class="vet-legend-item"><span class="pattern-dot"></span>おやつ</span>
+                                    <span class="vet-legend-item"><span class="line-total"></span>総量</span>
+                                </div>
+                                <div class="vet-legend-group">
+                                    <span class="vet-legend-label">投薬:</span>
+                                    <span class="vet-legend-item"><span class="line-appetite"></span>食欲増進薬</span>
+                                    <span class="vet-legend-item"><span class="marker-drip">▲</span>点滴</span>
+                                    <span class="vet-legend-item"><span class="marker-antiemetic">■</span>制吐薬</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 診療サマリーここまで -->
+
                     <div class="chart-section">
                         <h3>🏥 通院・点滴</h3>
                         <div class="chart-wrapper" style="height: 100px;">

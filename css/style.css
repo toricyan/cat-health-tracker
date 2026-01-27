@@ -1217,3 +1217,313 @@ textarea::placeholder {
     color: var(--text-light);
 }
 
+/* ========================================
+   🏥 獣医師向け診療サマリー（印刷用）
+   ======================================== */
+.vet-summary {
+    background: #fff;
+    border: 2px solid #333;
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-bottom: 24px;
+}
+
+.vet-summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #ccc;
+}
+
+.vet-summary-header h3 {
+    font-size: 1rem;
+    color: #333;
+}
+
+.print-btn {
+    background: #333;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.print-btn:hover {
+    background: #555;
+}
+
+.vet-chart-section,
+.vet-timeline-section,
+.vet-sub-section {
+    margin-bottom: 16px;
+}
+
+.vet-chart-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+    padding-left: 4px;
+    border-left: 3px solid #333;
+}
+
+.vet-chart-wrapper {
+    height: 180px;
+    position: relative;
+}
+
+/* 投薬タイムライン */
+.vet-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.75rem;
+    padding: 8px 0;
+}
+
+.vet-timeline-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 24px;
+}
+
+.vet-timeline-label {
+    width: 80px;
+    font-weight: 500;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.vet-timeline-bar {
+    flex: 1;
+    display: flex;
+    height: 100%;
+    position: relative;
+}
+
+.vet-timeline-day {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid #eee;
+    position: relative;
+}
+
+.vet-timeline-day:last-child {
+    border-right: none;
+}
+
+/* マーカースタイル */
+.vet-marker-drip {
+    font-size: 12px;
+    color: #333;
+}
+
+.vet-marker-drip-amount {
+    font-size: 8px;
+    position: absolute;
+    bottom: -2px;
+    color: #666;
+}
+
+.vet-marker-antiemetic {
+    width: 8px;
+    height: 8px;
+    background: #333;
+}
+
+.vet-marker-antiemetic-text {
+    font-size: 7px;
+    position: absolute;
+    top: -10px;
+    white-space: nowrap;
+    color: #333;
+}
+
+.vet-line-appetite {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #333;
+}
+
+/* 排尿回数表示 */
+.vet-urine-row {
+    display: flex;
+    font-size: 0.7rem;
+    color: #666;
+    border-top: 1px solid #ddd;
+    padding-top: 4px;
+    margin-top: 4px;
+}
+
+.vet-urine-day {
+    flex: 1;
+    text-align: center;
+}
+
+/* 凡例 */
+.vet-legend {
+    border-top: 1px solid #ccc;
+    padding-top: 12px;
+    margin-top: 8px;
+}
+
+.vet-legend-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.vet-legend-items {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.7rem;
+}
+
+.vet-legend-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.vet-legend-label {
+    font-weight: 600;
+    min-width: 40px;
+}
+
+.vet-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* 凡例パターン */
+.pattern-light {
+    display: inline-block;
+    width: 16px;
+    height: 12px;
+    background: #ddd;
+    border: 1px solid #999;
+}
+
+.pattern-medium {
+    display: inline-block;
+    width: 16px;
+    height: 12px;
+    background: #999;
+    border: 1px solid #666;
+}
+
+.pattern-stripe {
+    display: inline-block;
+    width: 16px;
+    height: 12px;
+    background: repeating-linear-gradient(
+        45deg,
+        #fff,
+        #fff 2px,
+        #666 2px,
+        #666 4px
+    );
+    border: 1px solid #666;
+}
+
+.pattern-dot {
+    display: inline-block;
+    width: 16px;
+    height: 12px;
+    background: radial-gradient(circle, #333 1.5px, #fff 1.5px);
+    background-size: 4px 4px;
+    border: 1px solid #666;
+}
+
+.line-total {
+    display: inline-block;
+    width: 20px;
+    height: 3px;
+    background: #333;
+    border-radius: 2px;
+}
+
+.line-appetite {
+    display: inline-block;
+    width: 20px;
+    height: 2px;
+    background: #333;
+}
+
+.marker-drip {
+    color: #333;
+    font-size: 10px;
+}
+
+.marker-antiemetic {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: #333;
+}
+
+/* ========================================
+   印刷スタイル（A5縦）
+   ======================================== */
+@media print {
+    /* 印刷時は診療サマリーのみ表示 */
+    body * {
+        visibility: hidden;
+    }
+    
+    .vet-summary,
+    .vet-summary * {
+        visibility: visible;
+    }
+    
+    .vet-summary {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 148mm; /* A5幅 */
+        height: 210mm; /* A5高さ */
+        border: none;
+        padding: 8mm;
+        margin: 0;
+        border-radius: 0;
+    }
+    
+    .print-btn {
+        display: none;
+    }
+    
+    .vet-chart-wrapper {
+        height: 45mm;
+    }
+    
+    .vet-chart-wrapper canvas {
+        max-height: 100%;
+    }
+    
+    /* グレースケール強制 */
+    * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}
+
+@page {
+    size: A5 portrait;
+    margin: 5mm;
+}
+

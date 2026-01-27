@@ -657,6 +657,14 @@ class UIController {
         document.getElementById('print-btn').addEventListener('click', () => {
             window.print();
         });
+        
+        // 診療サマリー印刷（A5）
+        const printSummaryBtn = document.getElementById('print-summary-btn');
+        if (printSummaryBtn) {
+            printSummaryBtn.addEventListener('click', () => {
+                window.print();
+            });
+        }
     }
     
     // 猫を選択
@@ -1590,6 +1598,9 @@ class UIController {
         
         // 投薬タイムラインを更新
         this.updateMedicineTimeline(data, labels);
+        
+        // 獣医師向け診療サマリーを更新
+        this.updateVetSummary(data, labels);
     }
     
     // 診断タイムラインを描画
@@ -1817,6 +1828,306 @@ class UIController {
         }, 500);
         
         Utils.showToast('データをエクスポートしました！', '📥');
+    }
+    
+    // ========================================
+    // 🏥 獣医師向け診療サマリー
+    // ========================================
+    
+    updateVetSummary(data, labels) {
+        // 食事量グラフ（積み上げ棒＋総量折れ線）
+        this.updateVetFoodChart(data, labels);
+        
+        // 投薬・点滴タイムライン
+        this.updateVetTimeline(data, labels);
+        
+        // 体重グラフ
+        this.updateVetWeightChart(data, labels);
+        
+        // 排尿回数テキスト
+        this.updateVetUrineRow(data, labels);
+    }
+    
+    // 食事量グラフ（白黒・積み上げ棒＋総量折れ線）
+    updateVetFoodChart(data, labels) {
+        const canvas = document.getElementById('vet-food-chart');
+        if (!canvas) return;
+        
+        // チュールをg換算（1本≒15g）、おやつも袋数×10g想定
+        const CHURU_GRAMS = 15;
+        const TREAT_GRAMS = 10;
+        
+        // 日付間引き（3日ごと）
+        const skipLabels = labels.map((label, i) => i % 3 === 0 ? label : '');
+        
+        // データ準備
+        const dryData = data.map(d => Number(d.daily?.dryFood) || 0);
+        const wetData = data.map(d => Number(d.daily?.wetFood) || 0);
+        const churuData = data.map(d => (Number(d.daily?.churu) || 0) * CHURU_GRAMS);
+        const treatData = data.map(d => (Number(d.daily?.treats) || 0) * TREAT_GRAMS);
+        const totalData = data.map((d, i) => dryData[i] + wetData[i] + churuData[i] + treatData[i]);
+        
+        // Canvas2Dパターン生成
+        const ctx = canvas.getContext('2d');
+        
+        // 斜線パターン
+        const stripePattern = this.createStripePattern(ctx);
+        // 点描パターン
+        const dotPattern = this.createDotPattern(ctx);
+        
+        this.createOrUpdateChart('vet-food-chart', {
+            type: 'bar',
+            data: {
+                labels: skipLabels,
+                datasets: [
+                    {
+                        label: 'カリカリ',
+                        data: dryData,
+                        backgroundColor: '#ddd',
+                        borderColor: '#999',
+                        borderWidth: 1,
+                        stack: 'food',
+                        order: 2
+                    },
+                    {
+                        label: 'ウェット',
+                        data: wetData,
+                        backgroundColor: '#999',
+                        borderColor: '#666',
+                        borderWidth: 1,
+                        stack: 'food',
+                        order: 2
+                    },
+                    {
+                        label: 'チュール',
+                        data: churuData,
+                        backgroundColor: stripePattern,
+                        borderColor: '#666',
+                        borderWidth: 1,
+                        stack: 'food',
+                        order: 2
+                    },
+                    {
+                        label: 'おやつ',
+                        data: treatData,
+                        backgroundColor: dotPattern,
+                        borderColor: '#666',
+                        borderWidth: 1,
+                        stack: 'food',
+                        order: 2
+                    },
+                    {
+                        label: '総摂取量',
+                        type: 'line',
+                        data: totalData,
+                        borderColor: '#333',
+                        backgroundColor: 'transparent',
+                        borderWidth: 3,
+                        pointRadius: 0,
+                        tension: 0.3,
+                        order: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => `${context.dataset.label}: ${context.raw}g`
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: true,
+                        grid: { display: false },
+                        ticks: {
+                            font: { size: 9 },
+                            maxRotation: 0,
+                            autoSkip: false
+                        }
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        title: { display: true, text: 'g', font: { size: 9 } },
+                        ticks: { font: { size: 9 } }
+                    }
+                }
+            }
+        });
+    }
+    
+    // 斜線パターン生成
+    createStripePattern(ctx) {
+        const patternCanvas = document.createElement('canvas');
+        patternCanvas.width = 8;
+        patternCanvas.height = 8;
+        const pctx = patternCanvas.getContext('2d');
+        pctx.fillStyle = '#fff';
+        pctx.fillRect(0, 0, 8, 8);
+        pctx.strokeStyle = '#666';
+        pctx.lineWidth = 2;
+        pctx.beginPath();
+        pctx.moveTo(0, 8);
+        pctx.lineTo(8, 0);
+        pctx.stroke();
+        return ctx.createPattern(patternCanvas, 'repeat');
+    }
+    
+    // 点描パターン生成
+    createDotPattern(ctx) {
+        const patternCanvas = document.createElement('canvas');
+        patternCanvas.width = 6;
+        patternCanvas.height = 6;
+        const pctx = patternCanvas.getContext('2d');
+        pctx.fillStyle = '#fff';
+        pctx.fillRect(0, 0, 6, 6);
+        pctx.fillStyle = '#333';
+        pctx.beginPath();
+        pctx.arc(3, 3, 1.5, 0, Math.PI * 2);
+        pctx.fill();
+        return ctx.createPattern(patternCanvas, 'repeat');
+    }
+    
+    // 投薬・点滴タイムライン
+    updateVetTimeline(data, labels) {
+        const container = document.getElementById('vet-timeline');
+        if (!container) return;
+        
+        // 日付間引き（3日ごと）
+        const skipLabels = labels.map((label, i) => i % 3 === 0 ? label : '');
+        
+        let html = '';
+        
+        // 食欲増進薬行（横線で投与期間を表示）
+        html += `<div class="vet-timeline-row">
+            <div class="vet-timeline-label">食欲増進薬</div>
+            <div class="vet-timeline-bar">
+                ${data.map((d, i) => {
+                    const hasAppetite = d.medicine?.appetite;
+                    return `<div class="vet-timeline-day">${hasAppetite ? '<div class="vet-line-appetite"></div>' : ''}</div>`;
+                }).join('')}
+            </div>
+        </div>`;
+        
+        // 点滴行（▲マーカー＋量）
+        html += `<div class="vet-timeline-row">
+            <div class="vet-timeline-label">点滴</div>
+            <div class="vet-timeline-bar">
+                ${data.map((d, i) => {
+                    const drip = Number(d.daily?.drip) || 0;
+                    if (drip > 0) {
+                        return `<div class="vet-timeline-day">
+                            <span class="vet-marker-drip">▲</span>
+                            <span class="vet-marker-drip-amount">${drip}cc</span>
+                        </div>`;
+                    }
+                    return '<div class="vet-timeline-day"></div>';
+                }).join('')}
+            </div>
+        </div>`;
+        
+        // 制吐薬行（■マーカー＋薬名）
+        html += `<div class="vet-timeline-row">
+            <div class="vet-timeline-label">制吐薬</div>
+            <div class="vet-timeline-bar">
+                ${data.map((d, i) => {
+                    // メモから制吐薬キーワードを検索
+                    const memo = (d.daily?.memo || '') + (d.hospital?.diagnosis || '');
+                    const antiemeticKeywords = ['プリンペラン', 'セレニア', 'メトクロプラミド', '制吐'];
+                    let found = null;
+                    for (const keyword of antiemeticKeywords) {
+                        if (memo.includes(keyword)) {
+                            found = keyword;
+                            break;
+                        }
+                    }
+                    if (found) {
+                        return `<div class="vet-timeline-day">
+                            <span class="vet-marker-antiemetic-text">${found}</span>
+                            <span class="vet-marker-antiemetic"></span>
+                        </div>`;
+                    }
+                    return '<div class="vet-timeline-day"></div>';
+                }).join('')}
+            </div>
+        </div>`;
+        
+        // 日付ラベル行
+        html += `<div class="vet-timeline-row">
+            <div class="vet-timeline-label"></div>
+            <div class="vet-timeline-bar">
+                ${skipLabels.map(label => `<div class="vet-timeline-day" style="font-size:8px;color:#666;">${label}</div>`).join('')}
+            </div>
+        </div>`;
+        
+        container.innerHTML = html;
+    }
+    
+    // 体重グラフ（細い折れ線）
+    updateVetWeightChart(data, labels) {
+        const canvas = document.getElementById('vet-weight-chart');
+        if (!canvas) return;
+        
+        const skipLabels = labels.map((label, i) => i % 3 === 0 ? label : '');
+        const weightData = data.map(d => {
+            const w = Number(d.daily?.weight);
+            return (w && w > 0) ? w : null;
+        });
+        
+        this.createOrUpdateChart('vet-weight-chart', {
+            type: 'line',
+            data: {
+                labels: skipLabels,
+                datasets: [{
+                    label: '体重(kg)',
+                    data: weightData,
+                    borderColor: '#888',
+                    backgroundColor: 'transparent',
+                    borderWidth: 1.5,
+                    pointRadius: 2,
+                    pointBackgroundColor: '#888',
+                    tension: 0.3,
+                    spanGaps: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { size: 8 }, maxRotation: 0, autoSkip: false }
+                    },
+                    y: {
+                        title: { display: true, text: 'kg', font: { size: 8 } },
+                        ticks: { font: { size: 8 } }
+                    }
+                }
+            }
+        });
+    }
+    
+    // 排尿回数テキスト表示
+    updateVetUrineRow(data, labels) {
+        const container = document.getElementById('vet-urine-row');
+        if (!container) return;
+        
+        // 3日ごとに表示
+        const html = data.map((d, i) => {
+            if (i % 3 !== 0) return '<div class="vet-urine-day"></div>';
+            const urine = d.toiletCount?.urine || d.daily?.urineCount || '-';
+            return `<div class="vet-urine-day">尿:${urine}</div>`;
+        }).join('');
+        
+        container.innerHTML = html;
     }
 }
 
