@@ -1477,6 +1477,13 @@ textarea::placeholder {
     background: #333;
 }
 
+.force-visible {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+
 /* ========================================
    印刷スタイル（A5縦）
    ======================================== */
