@@ -908,6 +908,15 @@ textarea::placeholder {
 .toast-icon {
     font-size: 1.2rem;
 }
+/* ========================================
+   印刷前のChart再描画用：強制表示
+   ======================================== */
+.force-visible {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
 
 /* ========================================
    印刷用スタイル
