@@ -42,13 +42,13 @@ const Utils = {
         const day = String(now.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
     },
-
+    
     // 現在時刻をHH:MM形式で取得
     getCurrentTime() {
         const now = new Date();
         return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
     },
-
+    
     // 日時をフォーマット
     formatDateTime(dateStr, timeStr) {
         const date = new Date(dateStr);
@@ -56,7 +56,7 @@ const Utils = {
         const day = date.getDate();
         return `${month}/${day} ${timeStr}`;
     },
-
+    
     // ストレージからデータを取得
     getData(key) {
         try {
@@ -67,7 +67,7 @@ const Utils = {
             return {};
         }
     },
-
+    
     // ストレージにデータを保存
     saveData(key, data) {
         try {
@@ -78,7 +78,7 @@ const Utils = {
             return false;
         }
     },
-
+    
     // トースト表示
     showToast(message = '保存しました！', icon = '✅') {
         const toast = document.getElementById('toast');
@@ -87,7 +87,7 @@ const Utils = {
         toast.classList.add('show');
         setTimeout(() => toast.classList.remove('show'), 2500);
     },
-
+    
     // ローディング表示
     showLoading(message = '読み込み中...') {
         const loading = document.getElementById('loading');
@@ -96,7 +96,7 @@ const Utils = {
             loading.classList.add('show');
         }
     },
-
+    
     // ローディング非表示
     hideLoading() {
         const loading = document.getElementById('loading');
@@ -104,7 +104,7 @@ const Utils = {
             loading.classList.remove('show');
         }
     },
-
+    
     // 一意のIDを生成
     generateId() {
         return Date.now().toString(36) + Math.random().toString(36).substr(2);
@@ -122,16 +122,16 @@ class DataManager {
         this.hospitalData = Utils.getData(STORAGE_KEYS.HOSPITAL);
         this.labtestData = Utils.getData(STORAGE_KEYS.LABTEST);
     }
-
+    
     // キーを生成（猫ID_日付）
     getKey(date, catId = APP_STATE.currentCat) {
         return `${catId}_${date}`;
     }
-
+    
     // スプレッドシートにPOSTリクエストを送信
     async postToSpreadsheet(data) {
         if (!USE_SPREADSHEET || !GAS_URL) return { success: false };
-
+        
         try {
             const response = await fetch(GAS_URL, {
                 method: 'POST',
@@ -147,7 +147,7 @@ class DataManager {
             return { success: false, error };
         }
     }
-
+    
     // 日次データを保存
     saveDailyRecord(date, record) {
         const key = this.getKey(date);
@@ -158,7 +158,7 @@ class DataManager {
             updatedAt: new Date().toISOString()
         };
         Utils.saveData(STORAGE_KEYS.DAILY, this.dailyData);
-
+        
         // スプレッドシートにも保存
         this.postToSpreadsheet({
             action: 'saveDailyRecord',
@@ -167,22 +167,22 @@ class DataManager {
             ...record
         });
     }
-
+    
     // 日次データを取得
     getDailyRecord(date, catId = APP_STATE.currentCat) {
         const key = this.getKey(date, catId);
         return this.dailyData[key] || null;
     }
-
+    
     // 日次データをスプレッドシートから取得（非同期）
     async getDailyRecordFromSheet(date, catId = APP_STATE.currentCat) {
         if (!USE_SPREADSHEET || !GAS_URL) return null;
-
+        
         try {
             const url = `${GAS_URL}?action=getDailyRecord&cat=${catId}&date=${date}`;
             const response = await fetch(url);
             const data = await response.json();
-
+            
             if (data && !data.error) {
                 // ローカルストレージにも保存
                 const key = this.getKey(date, catId);
@@ -199,14 +199,14 @@ class DataManager {
         }
         return null;
     }
-
+    
     // 排泄記録を追加
     addToiletRecord(date, record) {
         const key = this.getKey(date);
         if (!this.toiletData[key]) {
             this.toiletData[key] = [];
         }
-
+        
         const newRecord = {
             id: Utils.generateId(),
             ...record,
@@ -214,12 +214,12 @@ class DataManager {
             date: date,
             createdAt: new Date().toISOString()
         };
-
+        
         this.toiletData[key].push(newRecord);
         // 時刻順にソート
         this.toiletData[key].sort((a, b) => a.time.localeCompare(b.time));
         Utils.saveData(STORAGE_KEYS.TOILET, this.toiletData);
-
+        
         // スプレッドシートにも保存
         this.postToSpreadsheet({
             action: 'addToiletRecord',
@@ -227,39 +227,39 @@ class DataManager {
             date: date,
             ...record
         });
-
+        
         // 日次記録の排泄回数を自動更新
         this.updateDailyToiletCount(date);
-
+        
         return newRecord;
     }
-
+    
     // 排泄回数を日次記録に自動反映
     updateDailyToiletCount(date) {
         const records = this.getToiletRecords(date);
         let urineCount = 0;
         let fecesCount = 0;
-
+        
         records.forEach(r => {
             if (r.type === 'urine' || r.type === 'both') urineCount++;
             if (r.type === 'feces' || r.type === 'both') fecesCount++;
         });
-
+        
         // 日次記録を取得または作成
         const key = this.getKey(date);
         const existing = this.dailyData[key] || {
             cat: APP_STATE.currentCat,
             date: date
         };
-
+        
         // 排泄回数を更新
         existing.urineCount = urineCount;
         existing.fecesCount = fecesCount;
         existing.updatedAt = new Date().toISOString();
-
+        
         this.dailyData[key] = existing;
         Utils.saveData(STORAGE_KEYS.DAILY, this.dailyData);
-
+        
         // スプレッドシートも更新
         this.postToSpreadsheet({
             action: 'saveDailyRecord',
@@ -268,30 +268,30 @@ class DataManager {
             ...existing
         });
     }
-
+    
     // 排泄記録を取得
     getToiletRecords(date, catId = APP_STATE.currentCat) {
         const key = this.getKey(date, catId);
         return this.toiletData[key] || [];
     }
-
+    
     // 排泄記録をスプレッドシートから取得（非同期）
     // スプレッドシートのデータを正として使用
     async getToiletRecordsFromSheet(date, catId = APP_STATE.currentCat) {
         if (!USE_SPREADSHEET || !GAS_URL) return [];
-
+        
         try {
             const url = `${GAS_URL}?action=getToiletRecords&cat=${catId}&date=${date}`;
             const response = await fetch(url);
             const data = await response.json();
-
+            
             if (data && !data.error && Array.isArray(data)) {
                 // スプレッドシートのデータをそのまま使用（ローカルとマージしない）
                 const key = this.getKey(date, catId);
-
+                
                 // 時刻順にソート
                 data.sort((a, b) => (a.time || '').localeCompare(b.time || ''));
-
+                
                 // ローカルストレージを更新（スプレッドシートのデータで置き換え）
                 this.toiletData[key] = data;
                 Utils.saveData(STORAGE_KEYS.TOILET, this.toiletData);
@@ -302,25 +302,25 @@ class DataManager {
         }
         return [];
     }
-
+    
     // 排泄記録を削除
     deleteToiletRecord(date, recordId) {
         const key = this.getKey(date);
         if (this.toiletData[key]) {
             this.toiletData[key] = this.toiletData[key].filter(r => r.id !== recordId);
             Utils.saveData(STORAGE_KEYS.TOILET, this.toiletData);
-
+            
             // 日次記録の排泄回数も自動更新
             this.updateDailyToiletCount(date);
         }
-
+        
         // スプレッドシートからも削除
         this.postToSpreadsheet({
             action: 'deleteToiletRecord',
             id: recordId
         });
     }
-
+    
     // 投薬記録を保存
     saveMedicineRecord(date, timing, record) {
         const key = `${this.getKey(date)}_${timing}`;
@@ -332,7 +332,7 @@ class DataManager {
             updatedAt: new Date().toISOString()
         };
         Utils.saveData(STORAGE_KEYS.MEDICINE, this.medicineData);
-
+        
         // スプレッドシートにも保存
         this.postToSpreadsheet({
             action: 'saveMedicineRecord',
@@ -342,7 +342,7 @@ class DataManager {
             ...record
         });
     }
-
+    
     // 診察記録を保存
     saveHospitalRecord(datetime, record) {
         const id = Utils.generateId();
@@ -353,7 +353,7 @@ class DataManager {
             createdAt: new Date().toISOString()
         };
         Utils.saveData(STORAGE_KEYS.HOSPITAL, this.hospitalData);
-
+        
         // スプレッドシートにも保存
         this.postToSpreadsheet({
             action: 'saveHospitalRecord',
@@ -362,7 +362,7 @@ class DataManager {
             ...record
         });
     }
-
+    
     // 検査結果を保存
     saveLabtestRecord(date, record) {
         const key = this.getKey(date);
@@ -373,7 +373,7 @@ class DataManager {
             updatedAt: new Date().toISOString()
         };
         Utils.saveData(STORAGE_KEYS.LABTEST, this.labtestData);
-
+        
         // スプレッドシートにも保存
         this.postToSpreadsheet({
             action: 'saveLabtestRecord',
@@ -382,35 +382,35 @@ class DataManager {
             ...record
         });
     }
-
+    
     // 検査結果を取得
     getLabtestRecord(date, catId = APP_STATE.currentCat) {
         const key = this.getKey(date, catId);
         return this.labtestData[key] || null;
     }
-
+    
     // キャッシュ用オブジェクト
     dataCache = {};
     cacheExpiry = 5 * 60 * 1000; // 5分間キャッシュ
-
+    
     // 期間のデータを取得（グラフ用・非同期）
     async getDataForPeriod(startDate, endDate, catId = APP_STATE.currentCat) {
         const cacheKey = `${catId}_${startDate}_${endDate}`;
         const now = Date.now();
-
+        
         // キャッシュがあり、有効期限内ならキャッシュを返す
         if (this.dataCache[cacheKey] && (now - this.dataCache[cacheKey].timestamp < this.cacheExpiry)) {
             console.log('📦 キャッシュからデータ取得');
             return this.dataCache[cacheKey].data;
         }
-
+        
         // スプレッドシートからデータを取得
         if (USE_SPREADSHEET && GAS_URL) {
             try {
                 const url = `${GAS_URL}?action=getAllData&cat=${catId}&startDate=${startDate}&endDate=${endDate}`;
                 const response = await fetch(url);
                 const data = await response.json();
-
+                
                 if (data && !data.error && Array.isArray(data)) {
                     // キャッシュに保存
                     this.dataCache[cacheKey] = { data: data, timestamp: now };
@@ -421,28 +421,28 @@ class DataManager {
                 console.error('スプレッドシートからのデータ取得エラー:', error);
             }
         }
-
+        
         // フォールバック: ローカルストレージから取得
         return this.getDataForPeriodSync(startDate, endDate, catId);
     }
-
+    
     // キャッシュをクリア（データ更新時に呼ぶ）
     clearCache() {
         this.dataCache = {};
         console.log('🗑️ キャッシュクリア');
     }
-
+    
     // 期間のデータを取得（グラフ用・同期版）
     getDataForPeriodSync(startDate, endDate, catId = APP_STATE.currentCat) {
         const result = [];
         const start = new Date(startDate);
         const end = new Date(endDate);
-
+        
         for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
             const dateStr = d.toISOString().split('T')[0];
             const daily = this.getDailyRecord(dateStr, catId);
             const toiletRecords = this.getToiletRecords(dateStr, catId);
-
+            
             result.push({
                 date: dateStr,
                 daily: daily,
@@ -452,10 +452,10 @@ class DataManager {
                 }
             });
         }
-
+        
         return result;
     }
-
+    
     // 全データをエクスポート
     exportAllData() {
         return {
@@ -466,7 +466,7 @@ class DataManager {
             exportedAt: new Date().toISOString()
         };
     }
-
+    
     // CSVとしてエクスポート（日次データ）
     exportDailyToCSV(catId = APP_STATE.currentCat) {
         const headers = [
@@ -474,7 +474,7 @@ class DataManager {
             '飲水量(cc)', 'カリカリ(g)', 'ウェット(g)', 'チュール(本)', 'おやつ(袋)',
             '尿回数', '便回数', '便の状態', 'メモ'
         ];
-
+        
         const rows = Object.values(this.dailyData)
             .filter(r => r.cat === catId)
             .sort((a, b) => a.date.localeCompare(b.date))
@@ -494,11 +494,11 @@ class DataManager {
                 r.fecesCondition || '',
                 r.memo || ''
             ]);
-
+        
         const csv = [headers, ...rows]
             .map(row => row.map(cell => `"${cell}"`).join(','))
             .join('\n');
-
+        
         return csv;
     }
 }
@@ -510,27 +510,23 @@ class UIController {
     constructor(dataManager) {
         this.data = dataManager;
         this.charts = {};
-
-        // 印刷用に最後に描画したデータを保持
-        this.lastChartData = null;
-        this.lastChartLabels = null;
     }
-
+    
     // 初期化
     async init() {
         this.setupEventListeners();
         this.setDefaultDates();
         this.loadCurrentData();
         this.updateToiletList();
-
+        
         // 薬マスターを取得して投薬フォームを動的生成
         await this.loadMedicineList();
     }
-
+    
     // 薬マスターを取得
     async loadMedicineList() {
         if (!USE_SPREADSHEET) return;
-
+        
         try {
             const response = await fetch(`${GAS_URL}?action=getMedicineList`);
             const data = await response.json();
@@ -540,12 +536,12 @@ class UIController {
             console.error('薬マスター取得エラー:', error);
         }
     }
-
+    
     // 投薬フォームを動的生成
     renderMedicineForm() {
         const medicineList = APP_STATE.medicineList;
         if (!medicineList) return;
-
+        
         // 処方薬セクション
         const prescriptionContainer = document.getElementById('prescription-medicines');
         if (prescriptionContainer && medicineList.prescriptions) {
@@ -557,7 +553,7 @@ class UIController {
                 </label>
             `).join('');
         }
-
+        
         // サプリメントセクション
         const supplementContainer = document.getElementById('supplement-medicines');
         if (supplementContainer && medicineList.supplements) {
@@ -570,30 +566,30 @@ class UIController {
             `).join('');
         }
     }
-
+    
     // イベントリスナーを設定
     setupEventListeners() {
         // 猫選択
         document.querySelectorAll('.cat-btn').forEach(btn => {
             btn.addEventListener('click', () => this.selectCat(btn.dataset.cat));
         });
-
+        
         // タブ切り替え
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', () => this.selectTab(btn.dataset.tab));
         });
-
+        
         // 日次フォーム
         document.getElementById('daily-form').addEventListener('submit', (e) => {
             e.preventDefault();
             this.saveDailyForm();
         });
-
+        
         // 日付変更時にデータを読み込み
         document.getElementById('daily-date').addEventListener('change', () => {
             this.loadDailyData();
         });
-
+        
         // 排泄クイックボタン
         document.getElementById('quick-urine').addEventListener('click', () => {
             this.quickAddToilet('urine');
@@ -604,126 +600,91 @@ class UIController {
         document.getElementById('quick-both').addEventListener('click', () => {
             this.quickAddToilet('both');
         });
-
+        
         // 排泄フォーム
         document.getElementById('toilet-form').addEventListener('submit', (e) => {
             e.preventDefault();
             this.saveToiletForm();
         });
-
+        
         // 排泄日付変更
         document.getElementById('toilet-date').addEventListener('change', () => {
             this.updateToiletList();
         });
-
+        
         // 投薬フォーム
         document.getElementById('medicine-form').addEventListener('submit', (e) => {
             e.preventDefault();
             this.saveMedicineForm();
         });
-
+        
         // 診察フォーム
         document.getElementById('hospital-form').addEventListener('submit', (e) => {
             e.preventDefault();
             this.saveHospitalForm();
         });
-
+        
         // 点滴チェック時に量入力欄を表示
         document.querySelector('input[value="drip"]').addEventListener('change', (e) => {
-            document.getElementById('drip-amount-row').style.display =
+            document.getElementById('drip-amount-row').style.display = 
                 e.target.checked ? 'flex' : 'none';
         });
-
+        
         // 診察日時変更時にデータを読み込み
         document.getElementById('hospital-datetime').addEventListener('change', () => {
             this.loadHospitalData();
         });
-
+        
         // 検査結果フォーム
         document.getElementById('labtest-form').addEventListener('submit', (e) => {
             e.preventDefault();
             this.saveLabtestForm();
         });
-
+        
         // 検査日付変更時にデータを読み込み
         document.getElementById('labtest-date').addEventListener('change', () => {
             this.loadLabtestData();
         });
-
+        
         // グラフ日付変更
         document.getElementById('chart-start').addEventListener('change', () => this.updateCharts());
         document.getElementById('chart-end').addEventListener('change', () => this.updateCharts());
-
+        
         // エクスポート
         document.getElementById('export-btn').addEventListener('click', () => this.exportData());
-
+        
         // 印刷（グラフタブをそのまま印刷）
         document.getElementById('print-btn').addEventListener('click', () => {
             window.print();
         });
-
-        // 診療サマリー印刷（A5）
-        // ※印刷前に「サマリーを可視状態にして→2フレーム待って→再描画→print」する
-        const printSummaryBtn = document.getElementById('print-summary-btn');
-        if (printSummaryBtn) {
-            printSummaryBtn.addEventListener('click', async () => {
-                // 1) まずグラフデータが無いなら生成
-                if (!this.lastChartData) {
-                    await this.updateCharts();
-                }
-
-                // 2) 印刷領域を一時的に表示（display:noneだとChartが真っ白になりがち）
-                const summary = document.getElementById('vet-summary');
-                if (summary) summary.classList.add('force-visible');
-
-                // 3) DOM反映待ち（2フレーム）
-                await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-
-                // 4) サマリー再描画（特にChart.js）
-                if (this.lastChartData && this.lastChartLabels) {
-                    this.updateVetSummary(this.lastChartData, this.lastChartLabels);
-                }
-
-                // 5) 少し待ってから印刷
-                setTimeout(() => {
-                    // Chart.js があれば resize を促す
-                    Object.values(this.charts).forEach(ch => ch?.resize?.());
-
-                    window.print();
-
-                    // 6) 表示状態を戻す
-                    if (summary) summary.classList.remove('force-visible');
-                }, 80);
-            });
-        }
     }
-
+    
     // 猫を選択
     selectCat(catId) {
         APP_STATE.currentCat = catId;
-
+        
         document.querySelectorAll('.cat-btn').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.cat === catId);
         });
-
+        
         // データを再読み込み
         this.loadCurrentData();
         this.updateToiletList();
         this.updateCharts();
     }
-
+    
     // タブを選択
     selectTab(tabId) {
         APP_STATE.currentTab = tabId;
-
+        
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.tab === tabId);
         });
-
+        
         document.querySelectorAll('.tab-content').forEach(content => {
             content.classList.toggle('active', content.id === `${tabId}-tab`);
         });
-
+        
         // タブごとにデータを再読み込み
         if (tabId === 'daily') {
             this.loadDailyData();
@@ -737,34 +698,34 @@ class UIController {
             this.updateCharts();
         }
     }
-
+    
     // デフォルトの日付を設定
     setDefaultDates() {
         const today = Utils.getTodayDate();
         // グラフの開始日を11/14に設定
         const startDate = new Date('2025-11-14');
-
+        
         document.getElementById('daily-date').value = today;
         document.getElementById('toilet-date').value = today;
         document.getElementById('medicine-date').value = today;
         document.getElementById('hospital-datetime').value = today + 'T09:00';
         document.getElementById('labtest-date').value = today;
         document.getElementById('toilet-time').value = Utils.getCurrentTime();
-
+        
         document.getElementById('chart-start').value = startDate.toISOString().split('T')[0];
         document.getElementById('chart-end').value = today;
     }
-
+    
     // 現在のデータを読み込み
     loadCurrentData() {
         this.loadDailyData();
     }
-
+    
     // 日次データを読み込み
     async loadDailyData() {
         const date = document.getElementById('daily-date').value;
         let record = this.data.getDailyRecord(date);
-
+        
         // ローカルストレージにデータがなければスプレッドシートから取得
         if (!record) {
             Utils.showLoading('データを取得中...');
@@ -774,23 +735,23 @@ class UIController {
                 Utils.hideLoading();
             }
         }
-
+        
         // 排泄データをスプレッドシートから取得して回数を計算
         let autoUrineCount = 0;
         let autoFecesCount = 0;
-
+        
         // まずスプレッドシートから取得を試みる
         let toiletRecords = await this.data.getToiletRecordsFromSheet(date);
         if (toiletRecords.length === 0) {
             // 取得できなければローカルストレージを使用
             toiletRecords = this.data.getToiletRecords(date);
         }
-
+        
         toiletRecords.forEach(r => {
             if (r.type === 'urine' || r.type === 'both') autoUrineCount++;
             if (r.type === 'feces' || r.type === 'both') autoFecesCount++;
         });
-
+        
         if (record) {
             // フォームにデータを反映
             document.getElementById('weight').value = record.weight || '';
@@ -803,7 +764,7 @@ class UIController {
             document.getElementById('urine-count').value = autoUrineCount || record.urineCount || '';
             document.getElementById('feces-count').value = autoFecesCount || record.fecesCount || '';
             document.getElementById('daily-memo').value = record.memo || '';
-
+            
             // ラジオボタン
             this.setRadioValue('energy', record.energy);
             this.setRadioValue('appetite', record.appetite);
@@ -817,7 +778,7 @@ class UIController {
             document.getElementById('feces-count').value = autoFecesCount || '';
         }
     }
-
+    
     // ラジオボタンの値を設定
     setRadioValue(name, value) {
         const radios = document.querySelectorAll(`input[name="${name}"]`);
@@ -825,13 +786,13 @@ class UIController {
             radio.checked = radio.value === value;
         });
     }
-
+    
     // ラジオボタンの値を取得
     getRadioValue(name) {
         const checked = document.querySelector(`input[name="${name}"]:checked`);
         return checked ? checked.value : '';
     }
-
+    
     // 日次フォームを保存
     saveDailyForm() {
         const date = document.getElementById('daily-date').value;
@@ -849,32 +810,32 @@ class UIController {
             fecesCondition: this.getRadioValue('feces-condition'),
             memo: document.getElementById('daily-memo').value
         };
-
+        
         this.data.saveDailyRecord(date, record);
         this.data.clearCache(); // キャッシュをクリア
         Utils.showToast('日次記録を保存しました！');
     }
-
+    
     // クイック排泄追加
     quickAddToilet(type) {
         const date = document.getElementById('toilet-date').value;
         const time = Utils.getCurrentTime();
-
+        
         const record = {
             time: time,
             type: type,
             amount: 'normal',
             memo: ''
         };
-
+        
         this.data.addToiletRecord(date, record);
         this.updateToiletList();
-
-        const typeLabel = type === 'urine' ? 'おしっこ' :
-            type === 'feces' ? 'うんち' : '両方';
+        
+        const typeLabel = type === 'urine' ? 'おしっこ' : 
+                         type === 'feces' ? 'うんち' : '両方';
         Utils.showToast(`${time} ${typeLabel}を記録しました！`);
     }
-
+    
     // 排泄フォームを保存
     saveToiletForm() {
         const date = document.getElementById('toilet-date').value;
@@ -882,35 +843,35 @@ class UIController {
         const type = this.getRadioValue('toilet-type');
         const amount = this.getRadioValue('toilet-amount');
         const memo = document.getElementById('toilet-memo').value;
-
+        
         if (!time || !type) {
             Utils.showToast('時刻と種類を入力してください', '⚠️');
             return;
         }
-
+        
         const record = {
             time: time,
             type: type,
             amount: amount,
             memo: memo
         };
-
+        
         this.data.addToiletRecord(date, record);
         this.updateToiletList();
-
+        
         // フォームリセット
         document.getElementById('toilet-time').value = Utils.getCurrentTime();
         document.getElementById('toilet-memo').value = '';
         document.querySelectorAll('input[name="toilet-type"]').forEach(r => r.checked = false);
         document.querySelectorAll('input[name="toilet-amount"]').forEach(r => r.checked = false);
-
+        
         Utils.showToast('排泄記録を追加しました！');
     }
-
+    
     // 排泄リストを更新
     async updateToiletList() {
         const date = document.getElementById('toilet-date').value;
-
+        
         // スプレッドシートとローカルの両方からデータを取得してマージ
         Utils.showLoading('排泄記録を取得中...');
         let records = [];
@@ -922,14 +883,14 @@ class UIController {
         } finally {
             Utils.hideLoading();
         }
-
+        
         // スプレッドシートから取得できなければローカルのみ使用
         if (records.length === 0) {
             records = this.data.getToiletRecords(date);
         }
-
+        
         const list = document.getElementById('toilet-list');
-
+        
         if (records.length === 0) {
             list.innerHTML = `
                 <div class="empty-state">
@@ -939,10 +900,10 @@ class UIController {
             `;
             return;
         }
-
+        
         list.innerHTML = records.map(record => {
-            const typeIcon = record.type === 'urine' ? '💧' :
-                record.type === 'feces' ? '💩' : '💧💩';
+            const typeIcon = record.type === 'urine' ? '💧' : 
+                            record.type === 'feces' ? '💩' : '💧💩';
             // 量の表示（普通は表示しない）
             const amountLabel = {
                 'normal': '',
@@ -955,7 +916,7 @@ class UIController {
                 '少量': '(少量)',
                 '数滴': '(数滴)'
             }[record.amount] ?? '';
-
+            
             return `
                 <div class="record-item" data-id="${record.id}">
                     <span class="record-time">${record.time}</span>
@@ -968,53 +929,53 @@ class UIController {
             `;
         }).join('');
     }
-
+    
     // 排泄記録を削除
     deleteToiletRecord(date, recordId) {
         this.data.deleteToiletRecord(date, recordId);
         this.updateToiletList();
         Utils.showToast('記録を削除しました', '🗑️');
     }
-
+    
     // 投薬フォームを保存
     saveMedicineForm() {
         const date = document.getElementById('medicine-date').value;
         const timing = this.getRadioValue('timing');
-
+        
         if (!timing) {
             Utils.showToast('タイミングを選択してください', '⚠️');
             return;
         }
-
+        
         const medicines = Array.from(document.querySelectorAll('input[name="medicine"]:checked'))
             .map(cb => cb.value);
-
+        
         const record = {
             medicines: medicines,
             memo: document.getElementById('medicine-memo').value
         };
-
+        
         this.data.saveMedicineRecord(date, timing, record);
         Utils.showToast('投薬記録を保存しました！');
     }
-
+    
     // 診察データを読み込み
     async loadHospitalData() {
         const datetime = document.getElementById('hospital-datetime').value;
         const date = datetime.split('T')[0];
-
+        
         Utils.showLoading('診察記録を取得中...');
-
+        
         try {
             const url = `${GAS_URL}?action=getHospitalRecord&cat=${APP_STATE.currentCat}&date=${date}`;
             const response = await fetch(url);
             const record = await response.json();
-
+            
             if (record && !record.error) {
                 // 日時を反映（スプレッドシートのデータの時間に合わせる）
                 if (record.datetime) {
                     let dt = String(record.datetime);
-
+                    
                     // 日時形式を "yyyy-MM-ddTHH:mm" に変換
                     // ISO形式 "2026-01-03T01:10:00.000Z" → ローカル時間に変換
                     try {
@@ -1029,26 +990,26 @@ class UIController {
                         // フォールバック: 文字列から直接切り取り
                         dt = dt.replace(' ', 'T').replace(/:\d{2}\.\d{3}Z$/, '').substring(0, 16);
                     }
-
+                    
                     document.getElementById('hospital-datetime').value = dt;
                 }
-
+                
                 // フォームにデータを反映
                 document.getElementById('hospital-weight').value = record.weight || '';
                 document.getElementById('drip-amount').value = record.dripAmount || '';
                 document.getElementById('diagnosis').value = record.diagnosis || '';
                 document.getElementById('prescription').value = record.prescription || '';
-
+                
                 // チェックボックス
                 document.querySelector('input[value="drip"]').checked = record.hasDrip || false;
                 document.querySelector('input[value="echo"]').checked = record.hasEcho || false;
                 document.querySelector('input[value="blood"]').checked = record.hasBlood || false;
                 document.querySelector('input[value="urine"]').checked = record.hasUrine || false;
-
+                
                 // 点滴量入力欄の表示
-                document.getElementById('drip-amount-row').style.display =
+                document.getElementById('drip-amount-row').style.display = 
                     record.hasDrip ? 'flex' : 'none';
-
+                
                 Utils.showToast('診察記録を読み込みました', '📋');
             }
         } catch (error) {
@@ -1057,17 +1018,17 @@ class UIController {
             Utils.hideLoading();
         }
     }
-
+    
     // 診察フォームを保存
     saveHospitalForm() {
         const datetime = document.getElementById('hospital-datetime').value;
         const date = datetime.split('T')[0]; // 日付部分を取得
-
+        
         const treatments = Array.from(document.querySelectorAll('input[name="treatment"]:checked'))
             .map(cb => cb.value);
-
+        
         const dripAmount = treatments.includes('drip') ? document.getElementById('drip-amount').value : '';
-
+        
         const record = {
             weight: document.getElementById('hospital-weight').value,
             treatments: treatments,
@@ -1075,9 +1036,9 @@ class UIController {
             diagnosis: document.getElementById('diagnosis').value,
             prescription: document.getElementById('prescription').value
         };
-
+        
         this.data.saveHospitalRecord(datetime, record);
-
+        
         // 点滴がある場合、日次記録にも反映
         if (treatments.includes('drip') && dripAmount) {
             const dailyRecord = this.data.getDailyRecord(date) || {};
@@ -1085,19 +1046,19 @@ class UIController {
             dailyRecord.memo = (dailyRecord.memo || '') + (dailyRecord.memo ? '\n' : '') + '【通院】' + (document.getElementById('diagnosis').value || '');
             this.data.saveDailyRecord(date, dailyRecord);
         }
-
+        
         this.data.clearCache(); // キャッシュをクリア
         Utils.showToast('診察記録を保存しました！');
-
+        
         // フォームリセット
         document.getElementById('hospital-form').reset();
         document.getElementById('hospital-datetime').value = Utils.getTodayDate() + 'T09:00';
     }
-
+    
     // 検査結果フォームを保存
     saveLabtestForm() {
         const date = document.getElementById('labtest-date').value;
-
+        
         const record = {
             // 血液検査
             // CBC
@@ -1139,16 +1100,16 @@ class UIController {
             // 備考
             memo: document.getElementById('labtest-memo').value
         };
-
+        
         this.data.saveLabtestRecord(date, record);
         Utils.showToast('検査結果を保存しました！');
     }
-
+    
     // 検査結果データを読み込み
     loadLabtestData() {
         const date = document.getElementById('labtest-date').value;
         const record = this.data.getLabtestRecord(date);
-
+        
         if (record) {
             // CBC
             document.getElementById('wbc').value = record.wbc || '';
@@ -1195,43 +1156,16 @@ class UIController {
             document.getElementById('labtest-date').value = date;
         }
     }
-
-    // ========================================
-    // 💊 投薬判定ユーティリティ（データ形式ゆらぎ対策）
-    // ========================================
-    hasMedicine(dayObj, medKey) {
-        const m = dayObj?.medicine;
-
-        // ① そもそも medicine が無い
-        if (!m) return false;
-
-        // ② 旧形式: { rapros: true, lactulose: true ... } のようなフラグ
-        if (m[medKey] === true) return true;
-
-        // ③ 現在の保存形式: { medicines: ['rapros','...'], memo:'...' }
-        if (Array.isArray(m.medicines) && m.medicines.includes(medKey)) return true;
-
-        // ④ timing別で入ってくる可能性（念のため）
-        const timings = ['morning', 'noon', 'evening', 'night', 'am', 'pm'];
-        for (const t of timings) {
-            if (Array.isArray(m[t]?.medicines) && m[t].medicines.includes(medKey)) return true;
-        }
-
-        // ⑤ medicine自体が配列で来るケース
-        if (Array.isArray(m) && m.includes(medKey)) return true;
-
-        return false;
-    }
-
+    
     // グラフを更新
     async updateCharts() {
         const startDate = document.getElementById('chart-start').value;
         const endDate = document.getElementById('chart-end').value;
-
+        
         if (!startDate || !endDate) return;
-
+        
         Utils.showLoading('グラフを読み込み中...');
-
+        
         let data;
         try {
             data = await this.data.getDataForPeriod(startDate, endDate);
@@ -1242,21 +1176,17 @@ class UIController {
         } finally {
             Utils.hideLoading();
         }
-
+        
         if (!data || data.length === 0) {
             console.warn('データが取得できませんでした');
             return;
         }
-
+        
         const labels = data.map(d => {
             const date = new Date(d.date);
             return `${date.getMonth() + 1}/${date.getDate()}`;
         });
-
-        // 印刷用に最新データを保持
-        this.lastChartData = data;
-        this.lastChartLabels = labels;
-
+        
         // 共通のチャートオプション
         const commonOptions = {
             responsive: true,
@@ -1273,12 +1203,12 @@ class UIController {
                 }
             }
         };
-
+        
         // 体重グラフ
         const weightData = data.map(d => d.daily?.weight || null).filter(v => v !== null);
         const minWeight = weightData.length > 0 ? Math.min(...weightData) - 1 : 0;
         const maxWeight = weightData.length > 0 ? Math.max(...weightData) + 0.5 : 10;
-
+        
         this.createOrUpdateChart('weight-chart', {
             type: 'line',
             data: {
@@ -1298,7 +1228,7 @@ class UIController {
                 ...commonOptions,
                 scales: {
                     ...commonOptions.scales,
-                    y: {
+                    y: { 
                         beginAtZero: false,
                         min: minWeight,
                         max: maxWeight
@@ -1306,7 +1236,7 @@ class UIController {
                 }
             }
         });
-
+        
         // 排尿回数グラフ（排泄詳細シートを優先）
         this.createOrUpdateChart('urine-chart', {
             type: 'bar',
@@ -1326,7 +1256,7 @@ class UIController {
             },
             options: commonOptions
         });
-
+        
         // 食事量グラフ（カリカリ・ウェット＝棒、チュール＝折れ線）
         this.createOrUpdateChart('food-chart', {
             type: 'bar',
@@ -1378,8 +1308,8 @@ class UIController {
             options: {
                 ...commonOptions,
                 plugins: {
-                    legend: {
-                        display: true,
+                    legend: { 
+                        display: true, 
                         position: 'top',
                         labels: { boxWidth: 12, padding: 8, font: { size: 10 } }
                     }
@@ -1403,7 +1333,7 @@ class UIController {
                 }
             }
         });
-
+        
         // 飲水量グラフ（0や空は表示しない）
         const waterData = data.map(d => {
             const water = d.daily?.water;
@@ -1411,7 +1341,7 @@ class UIController {
         });
         const validWater = waterData.filter(v => v !== null);
         const minWater = validWater.length > 0 ? Math.min(...validWater) - 50 : 0;
-
+        
         this.createOrUpdateChart('water-chart', {
             type: 'line',
             data: {
@@ -1431,26 +1361,26 @@ class UIController {
                 ...commonOptions,
                 scales: {
                     ...commonOptions.scales,
-                    y: {
+                    y: { 
                         beginAtZero: false,
                         min: Math.max(0, minWater)
                     }
                 }
             }
         });
-
+        
         // 通院・点滴グラフ（全期間表示、棒がある日付だけラベル表示）
         const dripData = data.map(d => {
             const drip = d.daily?.drip;
             const dripNum = drip ? Number(drip) : 0;
             return (dripNum > 0) ? dripNum : null;
         });
-
+        
         // 棒が立っている日付だけをラベルにする（それ以外は空文字）
         const hospitalLabels = labels.map((label, index) => {
             return dripData[index] !== null ? label : '';
         });
-
+        
         this.createOrUpdateChart('hospital-chart', {
             type: 'bar',
             data: {
@@ -1484,7 +1414,7 @@ class UIController {
                 }
             }
         });
-
+        
         // 腎機能グラフ（クレアチニン・BUN）
         const creatinineData = data.map(d => {
             const val = d.labtest?.creatinine;
@@ -1494,12 +1424,12 @@ class UIController {
             const val = d.labtest?.bun;
             return (val && val > 0) ? Number(val) : null;
         });
-
+        
         // データがある日だけ表示
         const kidneyLabels = labels.map((label, index) => {
             return (creatinineData[index] !== null || bunData[index] !== null) ? label : '';
         });
-
+        
         this.createOrUpdateChart('kidney-chart', {
             type: 'line',
             data: {
@@ -1534,8 +1464,8 @@ class UIController {
             options: {
                 ...commonOptions,
                 plugins: {
-                    legend: {
-                        display: true,
+                    legend: { 
+                        display: true, 
                         position: 'top',
                         labels: { boxWidth: 12, padding: 8, font: { size: 10 } }
                     }
@@ -1561,7 +1491,7 @@ class UIController {
                 }
             }
         });
-
+        
         // 尿検査グラフ（蛋白質・潜血・比重）
         const urineProteinData = data.map(d => {
             const val = d.labtest?.urineProtein;
@@ -1575,11 +1505,11 @@ class UIController {
             const val = d.labtest?.urineSg;
             return (val && val > 0) ? Number(val) : null;
         });
-
+        
         const urineTestLabels = labels.map((label, index) => {
             return (urineProteinData[index] !== null || urineBloodData[index] !== null || urineSgData[index] !== null) ? label : '';
         });
-
+        
         this.createOrUpdateChart('urine-test-chart', {
             type: 'line',
             data: {
@@ -1626,8 +1556,8 @@ class UIController {
             options: {
                 ...commonOptions,
                 plugins: {
-                    legend: {
-                        display: true,
+                    legend: { 
+                        display: true, 
                         position: 'top',
                         labels: { boxWidth: 12, padding: 8, font: { size: 10 } }
                     }
@@ -1654,22 +1584,19 @@ class UIController {
                 }
             }
         });
-
+        
         // 診断タイムラインを更新
         this.updateDiagnosisTimeline(data);
-
+        
         // 投薬タイムラインを更新
         this.updateMedicineTimeline(data, labels);
-
-        // 獣医師向け診療サマリーを更新
-        this.updateVetSummary(data, labels);
     }
-
+    
     // 診断タイムラインを描画
     updateDiagnosisTimeline(data) {
         const container = document.getElementById('diagnosis-timeline');
         if (!container) return;
-
+        
         // 重要な診断・イベントのキーワード
         const importantKeywords = [
             { keyword: '腎盂腎炎', tag: '診断' },
@@ -1687,16 +1614,16 @@ class UIController {
             { keyword: '嘔吐', tag: '症状' },
             { keyword: '再開', tag: '投薬' }
         ];
-
+        
         // メモから重要なイベントを抽出
         const events = [];
         data.forEach(d => {
             if (!d.daily?.memo) return;
             const memo = d.daily.memo;
-
+            
             // 通院日のみ抽出
             if (!memo.includes('【通院】')) return;
-
+            
             // キーワードにマッチするイベントを抽出
             const matchedTags = [];
             importantKeywords.forEach(item => {
@@ -1704,7 +1631,7 @@ class UIController {
                     matchedTags.push({ keyword: item.keyword, tag: item.tag });
                 }
             });
-
+            
             if (matchedTags.length > 0 || memo.includes('【通院】')) {
                 const date = new Date(d.date);
                 events.push({
@@ -1715,18 +1642,18 @@ class UIController {
                 });
             }
         });
-
+        
         if (events.length === 0) {
             container.innerHTML = '<div style="text-align: center; color: var(--text-light); padding: 20px;">診断メモがありません</div>';
             return;
         }
-
+        
         // HTML生成
         let html = events.map(event => {
-            const tagHtml = event.tags.slice(0, 3).map(t =>
+            const tagHtml = event.tags.slice(0, 3).map(t => 
                 `<span class="diagnosis-tag">${t.tag}</span>`
             ).join('');
-
+            
             return `
                 <div class="diagnosis-item">
                     <div class="diagnosis-date">${event.dateStr}</div>
@@ -1737,15 +1664,15 @@ class UIController {
                 </div>
             `;
         }).join('');
-
+        
         container.innerHTML = html;
     }
-
+    
     // 投薬タイムラインを描画
     updateMedicineTimeline(data, labels) {
         const container = document.getElementById('medicine-timeline');
         if (!container) return;
-
+        
         // 薬マスターから取得（なければデフォルト）
         const medicineList = APP_STATE.medicineList || {
             prescriptions: [
@@ -1762,13 +1689,14 @@ class UIController {
                 { key: 'utclean', name: 'UT Clean', color: '#2D9CDB' }
             ]
         };
-
+        
         const prescriptionMeds = medicineList.prescriptions;
         const supplements = medicineList.supplements;
-
+        const medicines = [...prescriptionMeds, ...supplements];
+        
         // HTML生成
         let html = '';
-
+        
         // 点滴行
         html += `
             <div class="medicine-row">
@@ -1783,53 +1711,53 @@ class UIController {
                 </div>
             </div>
         `;
-
+        
         // 処方薬セクション
         html += `<div class="medicine-row" style="margin-top: 8px;"><div class="medicine-label" style="font-size: 0.75rem; color: var(--primary);">💊 処方薬</div><div class="medicine-bar-container" style="background: transparent;"></div></div>`;
-
+        
         prescriptionMeds.forEach(med => {
             html += `
                 <div class="medicine-row">
                     <div class="medicine-label">${med.name}</div>
                     <div class="medicine-bar-container">
                         ${data.map(d => {
-                            const hasThisMed = this.hasMedicine(d, med.key);
+                            const hasThisMed = d.medicine?.[med.key];
                             return `<div class="medicine-day" style="${hasThisMed ? 'background:' + med.color : ''}" title="${d.date}${hasThisMed ? ' ' + med.name : ''}"></div>`;
                         }).join('')}
                     </div>
                 </div>
             `;
         });
-
+        
         // サプリメントセクション
         html += `<div class="medicine-row" style="margin-top: 8px;"><div class="medicine-label" style="font-size: 0.75rem; color: var(--secondary);">🌿 サプリ</div><div class="medicine-bar-container" style="background: transparent;"></div></div>`;
-
+        
         supplements.forEach(med => {
             html += `
                 <div class="medicine-row">
                     <div class="medicine-label">${med.name}</div>
                     <div class="medicine-bar-container">
                         ${data.map(d => {
-                            const hasThisMed = this.hasMedicine(d, med.key);
+                            const hasThisMed = d.medicine?.[med.key];
                             return `<div class="medicine-day" style="${hasThisMed ? 'background:' + med.color : ''}" title="${d.date}${hasThisMed ? ' ' + med.name : ''}"></div>`;
                         }).join('')}
                     </div>
                 </div>
             `;
         });
-
+        
         // 日付ラベル
         html += `
             <div class="medicine-row">
                 <div class="medicine-label"></div>
                 <div class="medicine-bar-container" style="background: transparent; justify-content: space-between; font-size: 0.7rem; color: var(--text-light);">
                     <span>${labels[0] || ''}</span>
-                    <span>${labels[Math.floor(labels.length / 2)] || ''}</span>
-                    <span>${labels[labels.length - 1] || ''}</span>
+                    <span>${labels[Math.floor(labels.length/2)] || ''}</span>
+                    <span>${labels[labels.length-1] || ''}</span>
                 </div>
             </div>
         `;
-
+        
         // 凡例
         html += `
             <div class="medicine-legend">
@@ -1843,43 +1771,43 @@ class UIController {
                 </div>
             </div>
         `;
-
+        
         container.innerHTML = html;
     }
-
+    
     // チャートを作成または更新
     createOrUpdateChart(canvasId, config) {
         if (this.charts[canvasId]) {
             this.charts[canvasId].destroy();
         }
-
+        
         const ctx = document.getElementById(canvasId);
         if (ctx) {
             this.charts[canvasId] = new Chart(ctx, config);
         }
     }
-
+    
     // データをエクスポート
     exportData() {
         const catName = APP_STATE.cats[APP_STATE.currentCat].name;
-
+        
         // JSON全データ
         const allData = this.data.exportAllData();
         const jsonBlob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
-
+        
         // CSVデータ
         const csv = this.data.exportDailyToCSV(APP_STATE.currentCat);
         const csvBlob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
-
+        
         // ダウンロード
         const timestamp = new Date().toISOString().split('T')[0];
-
+        
         // JSONダウンロード
         const jsonLink = document.createElement('a');
         jsonLink.href = URL.createObjectURL(jsonBlob);
         jsonLink.download = `${catName}_全データ_${timestamp}.json`;
         jsonLink.click();
-
+        
         // CSVダウンロード
         setTimeout(() => {
             const csvLink = document.createElement('a');
@@ -1887,308 +1815,8 @@ class UIController {
             csvLink.download = `${catName}_日次データ_${timestamp}.csv`;
             csvLink.click();
         }, 500);
-
+        
         Utils.showToast('データをエクスポートしました！', '📥');
-    }
-
-    // ========================================
-    // 🏥 獣医師向け診療サマリー
-    // ========================================
-
-    updateVetSummary(data, labels) {
-        // 食事量グラフ（積み上げ棒＋総量折れ線）
-        this.updateVetFoodChart(data, labels);
-
-        // 投薬・点滴タイムライン
-        this.updateVetTimeline(data, labels);
-
-        // 体重グラフ
-        this.updateVetWeightChart(data, labels);
-
-        // 排尿回数テキスト
-        this.updateVetUrineRow(data, labels);
-    }
-
-    // 食事量グラフ（白黒・積み上げ棒＋総量折れ線）
-    updateVetFoodChart(data, labels) {
-        const canvas = document.getElementById('vet-food-chart');
-        if (!canvas) return;
-
-        // チュールをg換算（1本≒15g）、おやつも袋数×10g想定
-        const CHURU_GRAMS = 15;
-        const TREAT_GRAMS = 10;
-
-        // 日付間引き（3日ごと）
-        const skipLabels = labels.map((label, i) => i % 3 === 0 ? label : '');
-
-        // データ準備
-        const dryData = data.map(d => Number(d.daily?.dryFood) || 0);
-        const wetData = data.map(d => Number(d.daily?.wetFood) || 0);
-        const churuData = data.map(d => (Number(d.daily?.churu) || 0) * CHURU_GRAMS);
-        const treatData = data.map(d => (Number(d.daily?.treats) || 0) * TREAT_GRAMS);
-        const totalData = data.map((d, i) => dryData[i] + wetData[i] + churuData[i] + treatData[i]);
-
-        // Canvas2Dパターン生成
-        const ctx = canvas.getContext('2d');
-
-        // 斜線パターン
-        const stripePattern = this.createStripePattern(ctx);
-        // 点描パターン
-        const dotPattern = this.createDotPattern(ctx);
-
-        this.createOrUpdateChart('vet-food-chart', {
-            type: 'bar',
-            data: {
-                labels: skipLabels,
-                datasets: [
-                    {
-                        label: 'カリカリ',
-                        data: dryData,
-                        backgroundColor: '#ddd',
-                        borderColor: '#999',
-                        borderWidth: 1,
-                        stack: 'food',
-                        order: 2
-                    },
-                    {
-                        label: 'ウェット',
-                        data: wetData,
-                        backgroundColor: '#999',
-                        borderColor: '#666',
-                        borderWidth: 1,
-                        stack: 'food',
-                        order: 2
-                    },
-                    {
-                        label: 'チュール',
-                        data: churuData,
-                        backgroundColor: stripePattern,
-                        borderColor: '#666',
-                        borderWidth: 1,
-                        stack: 'food',
-                        order: 2
-                    },
-                    {
-                        label: 'おやつ',
-                        data: treatData,
-                        backgroundColor: dotPattern,
-                        borderColor: '#666',
-                        borderWidth: 1,
-                        stack: 'food',
-                        order: 2
-                    },
-                    {
-                        label: '総摂取量',
-                        type: 'line',
-                        data: totalData,
-                        borderColor: '#333',
-                        backgroundColor: 'transparent',
-                        borderWidth: 3,
-                        pointRadius: 0,
-                        tension: 0.3,
-                        order: 1
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: (context) => `${context.dataset.label}: ${context.raw}g`
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        stacked: true,
-                        grid: { display: false },
-                        ticks: {
-                            font: { size: 9 },
-                            maxRotation: 0,
-                            autoSkip: false
-                        }
-                    },
-                    y: {
-                        stacked: true,
-                        beginAtZero: true,
-                        title: { display: true, text: 'g', font: { size: 9 } },
-                        ticks: { font: { size: 9 } }
-                    }
-                }
-            }
-        });
-    }
-
-    // 斜線パターン生成
-    createStripePattern(ctx) {
-        const patternCanvas = document.createElement('canvas');
-        patternCanvas.width = 8;
-        patternCanvas.height = 8;
-        const pctx = patternCanvas.getContext('2d');
-        pctx.fillStyle = '#fff';
-        pctx.fillRect(0, 0, 8, 8);
-        pctx.strokeStyle = '#666';
-        pctx.lineWidth = 2;
-        pctx.beginPath();
-        pctx.moveTo(0, 8);
-        pctx.lineTo(8, 0);
-        pctx.stroke();
-        return ctx.createPattern(patternCanvas, 'repeat');
-    }
-
-    // 点描パターン生成
-    createDotPattern(ctx) {
-        const patternCanvas = document.createElement('canvas');
-        patternCanvas.width = 6;
-        patternCanvas.height = 6;
-        const pctx = patternCanvas.getContext('2d');
-        pctx.fillStyle = '#fff';
-        pctx.fillRect(0, 0, 6, 6);
-        pctx.fillStyle = '#333';
-        pctx.beginPath();
-        pctx.arc(3, 3, 1.5, 0, Math.PI * 2);
-        pctx.fill();
-        return ctx.createPattern(patternCanvas, 'repeat');
-    }
-
-    // 投薬・点滴タイムライン
-    updateVetTimeline(data, labels) {
-        const container = document.getElementById('vet-timeline');
-        if (!container) return;
-
-        // 日付間引き（3日ごと）
-        const skipLabels = labels.map((label, i) => i % 3 === 0 ? label : '');
-
-        let html = '';
-
-        // 食欲増進薬行（横線で投与期間を表示）
-        html += `<div class="vet-timeline-row">
-            <div class="vet-timeline-label">食欲増進薬</div>
-            <div class="vet-timeline-bar">
-                ${data.map((d, i) => {
-                    const hasAppetite = this.hasMedicine(d, 'appetite');
-                    return `<div class="vet-timeline-day">${hasAppetite ? '<div class="vet-line-appetite"></div>' : ''}</div>`;
-                }).join('')}
-            </div>
-        </div>`;
-
-        // 点滴行（▲マーカー＋量）
-        html += `<div class="vet-timeline-row">
-            <div class="vet-timeline-label">点滴</div>
-            <div class="vet-timeline-bar">
-                ${data.map((d, i) => {
-                    const drip = Number(d.daily?.drip) || 0;
-                    if (drip > 0) {
-                        return `<div class="vet-timeline-day">
-                            <span class="vet-marker-drip">▲</span>
-                            <span class="vet-marker-drip-amount">${drip}cc</span>
-                        </div>`;
-                    }
-                    return '<div class="vet-timeline-day"></div>';
-                }).join('')}
-            </div>
-        </div>`;
-
-        // 制吐薬行（■マーカー＋薬名）
-        html += `<div class="vet-timeline-row">
-            <div class="vet-timeline-label">制吐薬</div>
-            <div class="vet-timeline-bar">
-                ${data.map((d, i) => {
-                    // メモから制吐薬キーワードを検索
-                    const memo = (d.daily?.memo || '') + (d.hospital?.diagnosis || '');
-                    const antiemeticKeywords = ['プリンペラン', 'セレニア', 'メトクロプラミド', '制吐'];
-                    let found = null;
-                    for (const keyword of antiemeticKeywords) {
-                        if (memo.includes(keyword)) {
-                            found = keyword;
-                            break;
-                        }
-                    }
-                    if (found) {
-                        return `<div class="vet-timeline-day">
-                            <span class="vet-marker-antiemetic-text">${found}</span>
-                            <span class="vet-marker-antiemetic"></span>
-                        </div>`;
-                    }
-                    return '<div class="vet-timeline-day"></div>';
-                }).join('')}
-            </div>
-        </div>`;
-
-        // 日付ラベル行
-        html += `<div class="vet-timeline-row">
-            <div class="vet-timeline-label"></div>
-            <div class="vet-timeline-bar">
-                ${skipLabels.map(label => `<div class="vet-timeline-day" style="font-size:8px;color:#666;">${label}</div>`).join('')}
-            </div>
-        </div>`;
-
-        container.innerHTML = html;
-    }
-
-    // 体重グラフ（細い折れ線）
-    updateVetWeightChart(data, labels) {
-        const canvas = document.getElementById('vet-weight-chart');
-        if (!canvas) return;
-
-        const skipLabels = labels.map((label, i) => i % 3 === 0 ? label : '');
-        const weightData = data.map(d => {
-            const w = Number(d.daily?.weight);
-            return (w && w > 0) ? w : null;
-        });
-
-        this.createOrUpdateChart('vet-weight-chart', {
-            type: 'line',
-            data: {
-                labels: skipLabels,
-                datasets: [{
-                    label: '体重(kg)',
-                    data: weightData,
-                    borderColor: '#888',
-                    backgroundColor: 'transparent',
-                    borderWidth: 1.5,
-                    pointRadius: 2,
-                    pointBackgroundColor: '#888',
-                    tension: 0.3,
-                    spanGaps: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    x: {
-                        grid: { display: false },
-                        ticks: { font: { size: 8 }, maxRotation: 0, autoSkip: false }
-                    },
-                    y: {
-                        title: { display: true, text: 'kg', font: { size: 8 } },
-                        ticks: { font: { size: 8 } }
-                    }
-                }
-            }
-        });
-    }
-
-    // 排尿回数テキスト表示
-    updateVetUrineRow(data, labels) {
-        const container = document.getElementById('vet-urine-row');
-        if (!container) return;
-
-        // 3日ごとに表示
-        const html = data.map((d, i) => {
-            if (i % 3 !== 0) return '<div class="vet-urine-day"></div>';
-            const urine = d.toiletCount?.urine || d.daily?.urineCount || '-';
-            return `<div class="vet-urine-day">尿:${urine}</div>`;
-        }).join('');
-
-        container.innerHTML = html;
     }
 }
 
@@ -2202,7 +1830,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dataManager = new DataManager();
     ui = new UIController(dataManager);
     ui.init();
-
+    
     console.log('🐱 にゃん健康手帳 起動完了！');
 });
 
